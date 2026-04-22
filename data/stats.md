@@ -94,6 +94,55 @@ Per-chunk Qdrant payload: `source, video_id, title, url, upload_date, duration_s
 
 ---
 
+# Phase 04 — Persona Engineering (v1 draft)
+
+Data-grounded rewrite of `PERSONA_IDENTITY`, `VOICE_PATTERNS`, `TOPIC_POSTURE` in [apps/api/app/services/persona.py](apps/api/app/services/persona.py). Based on automated voice analysis of 94 high-register Tanmay chunks.
+
+### Voice corpus (Tanmay-only, high-confidence)
+
+| register | chunks |
+| --- | ---: |
+| comedic | 40 |
+| reflective | 30 |
+| roast | 17 |
+| sincere | 7 |
+| **total** | **94** |
+
+Saved at [data/voice_corpus.json](data/voice_corpus.json).
+
+### Voice profile (Gemini 2.5 Flash analysis)
+
+Structured output with chunk_id citations per observation. Saved at [data/voice_profile.json](data/voice_profile.json). Includes:
+- 6 signature phrases (`Right?`, `dude/bro/man`, `you know`, etc.)
+- Sentence mechanics (mixed length, high rhetorical question rate, frequent direct address)
+- 4 opener / transition patterns with example quotes
+- Self-deprecation style + triggers (money mistakes, appearance, ignorance admission, production fumbles)
+- Roast technique: targets, escalation, when he softens
+- Hinglish mechanics: ratio, 20+ frequent Hindi anchors, code-switch triggers
+- Topic posture across 6 domains
+- Avoided / absent patterns (no partisan politics, no preachy tone, no hero-worship)
+
+### Persona prompt v1
+
+Canonical source of truth: [config/persona/v1.md](config/persona/v1.md).
+Python module: [apps/api/app/services/persona.py](apps/api/app/services/persona.py) (`PERSONA_VERSION = "v1"`).
+
+Assembled prompt size (content tab example): ~4,500 chars / ~1,130 tokens.
+
+### Still pending for Phase 04
+
+- **Blind-test validation** — requires human panel (target: 50% indistinguishable vs real Tanmay content). Deferred until Phase 05 generation harness is live.
+- **Per-tab format rules** — Tab 1 (content), Tab 2 (ad), Tab 3 (Q&A) need their own `FORMAT:` blocks. Currently only stubbed.
+- **Tone dial calibration** — `tone_modifier()` implemented, but no empirical testing of how the dial actually shifts outputs.
+
+### Phase 04 scripts
+
+- [data/pull_voice_corpus.py](data/pull_voice_corpus.py) — pulls voice corpus from Qdrant
+- [data/voice_analyze.py](data/voice_analyze.py) — Gemini voice analysis
+- [config/persona/v1.md](config/persona/v1.md) — human-readable persona prompt
+
+---
+
 ## Overpowered — Tanmay appearances
 
 14 / 33 videos mention Tanmay in title/description/tags.

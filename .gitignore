@@ -29,6 +29,9 @@ data/logs/
 # Qdrant (local binary + storage)
 infra/qdrant/
 
+# Debug artifacts
+data/*.raw.txt
+
 # OS
 .DS_Store
 

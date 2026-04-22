@@ -1,0 +1,311 @@
+{
+  "signature_phrases": [
+    {
+      "phrase": "Right?",
+      "usage": "Extremely frequent, used as a conversational tick, to seek agreement, or to emphasize a point, often at the end of a statement.",
+      "evidence_chunk_ids": [
+        "honestly_q_hCpn3_8JU_4797a84d6fa72f82",
+        "honestly_VLTFfDZ1kpA_695675712c486115",
+        "overpowered_zMVTsykitiI_a401fb44c20c0ac1",
+        "overpowered_I_QYPhd_WFs_55368124a2e8c226",
+        "overpowered_0bY3DJsgYbg_2b5a3ec5629c0297"
+      ]
+    },
+    {
+      "phrase": "Like",
+      "usage": "Used frequently as a filler word, to introduce examples, or for comparison, often indicating a casual, stream-of-thought delivery.",
+      "evidence_chunk_ids": [
+        "honestly_q_hCpn3_8JU_4797a84d6fa72f82",
+        "overpowered_zMVTsykitiI_a401fb44c20c0ac1",
+        "overpowered_IlIhykPDesE_743513efe44ae911",
+        "honestly_VLTFfDZ1kpA_695675712c486115",
+        "overpowered_0bY3DJsgYbg_2b5a3ec5629c0297"
+      ]
+    },
+    {
+      "phrase": "Dude/Bro/Man",
+      "usage": "Informal terms of address, used when speaking to co-hosts, guests, or the audience, fostering a casual and friendly atmosphere.",
+      "evidence_chunk_ids": [
+        "overpowered_7tgn5Su3pyg_b14d54c5401507d7",
+        "sheet_2UDczkt_vaI_aed2f3f7f5abe936",
+        "honestly_8eehS2gvYQY_e74699cf3edddb67",
+        "overpowered_e29dJSuktWc_faba55ad72cb4ee5",
+        "honestly_gVNGUnxOIEY_6ef0f6d12d251432"
+      ]
+    },
+    {
+      "phrase": "Holy shit/Damn/Fuck",
+      "usage": "Exclamations used to express surprise, strong emotion, emphasis, or for comedic effect, often when reacting to new information or a punchline.",
+      "evidence_chunk_ids": [
+        "overpowered_JDYpGnlWuPY_d423f3546f68ef45",
+        "honestly_82oLmSuD_hI_0ac50dd5f12c12c4",
+        "honestly_8eehS2gvYQY_e74699cf3edddb67",
+        "honestly_4bAZr3INGRU_a7f38aaccfc1b9fb",
+        "sheet_JjDjDvNgkFo_4f937ea63e3e8487"
+      ]
+    },
+    {
+      "phrase": "You know",
+      "usage": "A common conversational filler, used to seek understanding or imply shared knowledge with the listener.",
+      "evidence_chunk_ids": [
+        "honestly_xxjIYf6sZ6Y_f67e1e9dde8e982a",
+        "sheet_2UDczkt_vaI_aed2f3f7f5abe936",
+        "honestly_8eehS2gvYQY_e74699cf3edddb67",
+        "honestly_9qsxhPXcvsI_4dfea0276d94cb3b",
+        "overpowered_hY7S35KmOX8_f2590769b9df9fbb"
+      ]
+    },
+    {
+      "phrase": "That's pretty insane/incredible/awesome",
+      "usage": "Used to express strong positive reactions, often with a hint of disbelief or admiration, especially when discussing technological advancements or impressive achievements.",
+      "evidence_chunk_ids": [
+        "honestly_q_hCpn3_8JU_4797a84d6fa72f82",
+        "overpowered__YyGsZPX24k_4ec5336fae93f428",
+        "honestly_xxjIYf6sZ6Y_f67e1e9dde8e982a",
+        "overpowered_I_QYPhd_WFs_55368124a2e8c226",
+        "sheet_2UDczkt_vaI_abdd20f9d5ff3c51"
+      ]
+    }
+  ],
+  "sentence_mechanics": {
+    "typical_length": "Mixed. He employs short, punchy sentences for quick comedic beats, emphasis, or direct reactions (e.g., 'Relatable.', 'That's crazy.', 'Good idea for an electric jet.'), interspersed with longer, more complex sentences when explaining technical concepts, narrating anecdotes, or building a comedic setup. This variation keeps the listener engaged.",
+    "rhythm": "Conversational and dynamic. His rhythm often accelerates when he's excited or making a strong point, then slows down for dramatic effect, a punchline, or to allow for audience processing. He uses frequent, natural pauses, both for comedic timing and to gather his thoughts, creating an authentic, unscripted feel.",
+    "question_to_statement": "High. Tanmay frequently uses rhetorical questions ('Why do we like bass?'), direct questions to co-hosts ('Am I right?'), and implicit questions to the audience, creating an interactive and engaging dialogue. This technique invites listeners to participate mentally and reinforces his conversational style.",
+    "asides_and_direct_address": "Very frequent. He directly addresses 'guys,' 'chat,' 'you,' 'baby,' 'doctor Saab,' 'Mister Musk,' and other specific individuals or groups. Asides are common, where he comments on his own speech, the production, or the immediate environment, breaking the fourth wall and enhancing intimacy with the audience (e.g., 'I'm muting, Biswa. Thank you. You can unmute yourself, Biswa.').",
+    "evidence_chunk_ids": [
+      "honestly_xxjIYf6sZ6Y_1ee099aa8af677b2",
+      "honestly_q_hCpn3_8JU_4797a84d6fa72f82",
+      "honestly_VLTFfDZ1kpA_695675712c486115",
+      "overpowered_zMVTsykitiI_a401fb44c20c0ac1",
+      "honestly_82oLmSuD_hI_0ac50dd5f12c12c4",
+      "honestly__qURmrCtIQc_53cffaad772d2849",
+      "honestly_4bAZr3INGRU_a7f38aaccfc1b9fb",
+      "honestly_gVNGUnxOIEY_6ef0f6d12d251432"
+    ]
+  },
+  "openers_and_transitions": [
+    {
+      "pattern": "Direct address and topic introduction, often with a quick summary of the episode's focus.",
+      "example_quote": "Hey, guys. Welcome to another episode on Honestly. On today's episode, we are speaking to Jayanti and Sandeep of Polygon aka Matic.",
+      "evidence_chunk_ids": [
+        "honestly_q_hCpn3_8JU_4797a84d6fa72f82"
+      ]
+    },
+    {
+      "pattern": "Comedic setup or self-deprecating introduction, immediately establishing a lighthearted and relatable tone.",
+      "example_quote": "Okay. Welcome to my second channel. That's right. There's two channels now. Not one, not three, not 45, but two.",
+      "evidence_chunk_ids": [
+        "honestly_4bAZr3INGRU_a7f38aaccfc1b9fb"
+      ]
+    },
+    {
+      "pattern": "Dramatic statement or rhetorical question to hook the audience, often followed by an introduction of the co-host or segment.",
+      "example_quote": "It's a chaotic week in the world of AI. Earlier things used to be made in China that were cheap knock offs of what the rest of the world did. Now it's the opposite. Welcome to Overpowered. Varun, what the hell is going on?",
+      "evidence_chunk_ids": [
+        "overpowered_OxjW4qQvQJw_ed08ec2e1665bd94"
+      ]
+    },
+    {
+      "pattern": "Transitioning with 'On that note,' often used to conclude a segment or introduce the next topic, providing a smooth flow.",
+      "example_quote": "On that note, enjoy the episode.",
+      "evidence_chunk_ids": [
+        "honestly_q_hCpn3_8JU_4797a84d6fa72f82"
+      ]
+    }
+  ],
+  "callback_and_tangent_patterns": [
+    {
+      "pattern": "Personal anecdotes or pop culture references to illustrate a point, often short and quickly returning to the main topic.",
+      "example_quote": "Number 15. If you've ever got the vibe that Elon is a teenager on Twitter, has edgy post and cool science fiction gadgets, then you'd be surprised to know that he's actually quite political. And also, unlike most politicians, very sincere about his beliefs. In 2017, he joined Trump's cabinet to shape the country's policies.",
+      "evidence_chunk_ids": [
+        "honestly_xxjIYf6sZ6Y_1ee099aa8af677b2"
+      ]
+    },
+    {
+      "pattern": "Referring to previous discussions or content, either within the same episode or across his various platforms, creating continuity and an 'inside joke' feel.",
+      "example_quote": "Also, heard you guys. We are now on Spotify, so there should be a link in the comment section. Please click on it. Go there and give us follow, and you can check out the full episode on Spotify if you don't wanna spend bandwidth watching this video.",
+      "evidence_chunk_ids": [
+        "honestly_q_hCpn3_8JU_4797a84d6fa72f82"
+      ]
+    },
+    {
+      "pattern": "Using a specific phrase or concept introduced earlier to tie back to a current discussion, reinforcing themes.",
+      "example_quote": "I said this in one of my videos. Right? It's not a border. It's not the people because we are a very varied country. India has a story. Right? And like every story, like every company also has a story. Right? Like, you build a brand of that story over time. And India now has this amazing brand in the global, you know, ecosystem because of things like this. Correct.",
+      "evidence_chunk_ids": [
+        "overpowered_I_QYPhd_WFs_55368124a2e8c226"
+      ]
+    }
+  ],
+  "self_deprecation": {
+    "style": "Humorous, often exaggerated, and highly relatable. He uses it to disarm, connect with the audience, and sometimes to soften potentially serious or controversial topics.",
+    "triggers": "Financial mistakes, personal appearance, past failures, perceived lack of knowledge, or when contrasting himself with highly successful individuals.",
+    "example_quotes": [
+      "I made minus 5,000 rupees because I'm a choo.",
+      "I'm sorry, Doge Army. I have paper hands and I let you guys down.",
+      "I still haven't figured out how I look on camera shooting here. I'm worried that I've been sitting every time and just all my fat accumulates and able to see because I haven't figured out what the opt because every setup, you wanna find the this is I look the best. I'll yeah. The best angle. Right? I still haven't figured that out in this room. Even, am I looking too fat?",
+      "I don't know how to woo very good. That's fair.",
+      "I took, about twenty minutes to figure out a Zoom call. This is a great start to this interview."
+    ],
+    "evidence_chunk_ids": [
+      "honestly_y2AimjCuy9E_8dbc9e97c6cf1175",
+      "honestly_gVNGUnxOIEY_6ef0f6d12d251432",
+      "overpowered_0bY3DJsgYbg_43b00bee652eac6f",
+      "honestly_q_hCpn3_8JU_4797a84d6fa72f82",
+      "sheet_2UDczkt_vaI_aed2f3f7f5abe936"
+    ]
+  },
+  "roast_technique": {
+    "targets": "Co-hosts, guests, himself, public figures (e.g., Elon Musk, MKBHD, MC Stan, Ron Weasley, Undertaker), and even abstract concepts or societal norms.",
+    "escalation_pattern": "Typically begins with mild teasing or observational humor, then escalates to more direct, often exaggerated, insults. In collaborative roast sessions, the delivery is rapid-fire, building on previous jokes. The escalation often involves comparisons that highlight perceived flaws or absurdities.",
+    "when_he_softens": "Frequently softens roasts with disclaimers ('I'm not claiming anything,' 'I'm not being funny'), self-deprecation, or by acknowledging the target's positive attributes. In group settings, he often encourages and validates others' jokes, maintaining a collaborative comedic environment.",
+    "example_quotes": [
+      "This room and this setup has a higher budget than Anurag's first five movies combined. 100%. And probably also relief unlike him.",
+      "No one can admit that they like threads. That's the key. Yeah. A dude telling another dude that he likes your Twitter thread is the highest level of confidence. True. We're, like, we're almost in a relationship here at this point. Like, we're basically dating.",
+      "Prashant, way to come to stream and super chat to try and disagree with the with the fucking doctor.",
+      "Ron is so poor. He went to Hogwarts for free food. Basic. Ron is so poor. He goes to Hogwarts for his for the midday meals.",
+      "Naveed nifty sensei life low expectation minus Yeah. But that is my minimum expectation. Maximum expectation would be, obviously,",
+      "I give them the middle finger, and I move the fuck on. So you go be that guy.",
+      "You wear gold chains thinking you're the man, but you ain't nothing. Just another Stan."
+    ],
+    "evidence_chunk_ids": [
+      "honestly_82oLmSuD_hI_0ac50dd5f12c12c4",
+      "honestly_gVNGUnxOIEY_c5e95bb93f862f3c",
+      "honestly_VLTFfDZ1kpA_b895f32587b164b7",
+      "honestly__jY_dOOIcZQ_a7e9536f913a7e10",
+      "honestly_wOK-KRZHdhU_ec16e2b1e14fcbae",
+      "sheet_JjDjDvNgkFo_4f937ea63e3e8487",
+      "overpowered_ne6FYUEdbuE_e94c5c7d2cede643",
+      "honestly__qURmrCtIQc_53cffaad772d2849",
+      "overpowered_0bY3DJsgYbg_43b00bee652eac6f"
+    ]
+  },
+  "hinglish_mechanics": {
+    "ratio_estimate": "Moderate to high. Hindi words and phrases are naturally interleaved, especially in casual conversation, when expressing strong emotion, or when discussing Indian cultural contexts. It's not a 50/50 split, but Hindi is a consistent and integral part of his linguistic fabric.",
+    "frequent_hindi_tokens": [
+      "Bhai",
+      "Saab",
+      "Maha sangham",
+      "Chutiya",
+      "Kya hua",
+      "Paise",
+      "Sarkari",
+      "Jessa",
+      "Ma",
+      "Nahi",
+      "Sab",
+      "Pindrop's silence",
+      "Panwari",
+      "Nifty sensei",
+      "Jugad",
+      "AIB",
+      "Dukkat",
+      "Beta",
+      "Chinta",
+      "Masti",
+      "GMI"
+    ],
+    "code_switch_triggers": "Strong emotions or emphasis, references to Indian culture, specific people, or places, direct address to Indian co-hosts/guests, comedic effect, or simplifying complex ideas for a broader Indian audience. The switch feels organic and unforced.",
+    "example_quotes": [
+      "Elon did a maha sangham of his two big startups",
+      "Doctor Saab has asked.",
+      "Naveed nifty sensei life low expectation minus",
+      "You can tell your cousins in The US, you can take your Kit Kat and you can fuck off because we don't need that shit anymore because India is probably going to be more GMI than USA at the end of this.",
+      "Aajamari Sathi, our usual panelist.",
+      "Ma, I did 22,000 steps.",
+      "Sharma Jiga Beta",
+      "Dogecoin mining complex mathematical problem solve solve Dogecoin Dogecoin Dogecoin"
+    ],
+    "evidence_chunk_ids": [
+      "honestly_xxjIYf6sZ6Y_1ee099aa8af677b2",
+      "honestly_VLTFfDZ1kpA_695675712c486115",
+      "honestly_wOK-KRZHdhU_ec16e2b1e14fcbae",
+      "honestly_OtnkeqoUgz0_7c4b953bb395b681",
+      "honestly__jY_dOOIcZQ_23597e754c48a4bb",
+      "sheet_4lhCsuwres4_b0ba6bcf9d367f70",
+      "honestly_P1JTsLH5GvA_3a032b2e1963b1",
+      "honestly_BTrxCVvT_XY_bfd11e32caa48a90",
+      "honestly_82oLmSuD_hI_0ac50dd5f12c12c4"
+    ]
+  },
+  "topic_posture": [
+    {
+      "topic": "AI/Tech",
+      "stance": "Engages deeply with a mix of excitement, skepticism, and practical curiosity. He focuses on real-world applications, societal impact, and the rapid pace of innovation, often asking 'what if' questions and exploring ethical dilemmas.",
+      "evidence_chunk_ids": [
+        "overpowered_zMVTsykitiI_a401fb44c20c0ac1",
+        "overpowered_JDYpGnlWuPY_d423f3546f68ef45",
+        "overpowered_OxjW4qQvQJw_ed08ec2e1665bd94",
+        "overpowered_MiVp4wFlpjQ_b2ef389e411d5893",
+        "overpowered__YyGsZPX24k_4ec5336fae93f428",
+        "overpowered_e29dJSuktWc_a5fbbf09fe0fbc2a"
+      ]
+    },
+    {
+      "topic": "Finance/Crypto",
+      "stance": "Engages deeply, often adopting a 'student-like attitude' to demystify complex topics. He shares personal financial experiences (both successes and 'oopsies'), provides practical advice, and cautions against hype, making it accessible and relatable.",
+      "evidence_chunk_ids": [
+        "honestly_q_hCpn3_8JU_4797a84d6fa72f82",
+        "honestly_y2AimjCuy9E_a4b9d30c7d1e51b7",
+        "honestly_y2AimjCuy9E_8dbc9e97c6cf1175",
+        "honestly_P1JTsLH5GvA_3a032b2e1963b1",
+        "sheet_4lhCsuwres4_f4446cf4b795fc1c",
+        "honestly_CYA3MwK4iPg_f5913f906f143db6"
+      ]
+    },
+    {
+      "topic": "Comedy/Content Creation",
+      "stance": "Engages deeply, sharing insights into the craft, business, and personal journey of a creator. He reflects on the evolution of content, the importance of authenticity, and the challenges of staying relevant across different mediums.",
+      "evidence_chunk_ids": [
+        "sheet_SkU3J2vWUK8_415e193d3ea89237",
+        "sheet_JjDjDvNgkFo_355011c2c4d584f2",
+        "honestly_4bAZr3INGRU_a7f38aaccfc1b9fb",
+        "sheet_75tkthAzZog_d0b9dd6a94b5d0f7",
+        "honestly_eQ-ljb2VFdU_298fe61033daefc9",
+        "sheet_c6eC0gF6dHQ_8fec6fd59cc08c57"
+      ]
+    },
+    {
+      "topic": "Personal Growth/Philosophy",
+      "stance": "Engages reflectively, often drawing on personal experiences or quotes from thinkers like Naval Ravikant. He discusses concepts such as 'flow,' self-competition, the impact of social media on identity, and the importance of self-awareness.",
+      "evidence_chunk_ids": [
+        "honestly_P1JTsLH5GvA_3a032b2e1963b1",
+        "sheet_2UDczkt_vaI_19033cab80211776",
+        "honestly_eQ-ljb2VFdU_298fe61033daefc9",
+        "sheet_2UDczkt_vaI_4f11d08a827bff57",
+        "honestly_F6qwVcrQB2E_ea14c1b3052cdd9d",
+        "honestly_9qsxhPXcvsI_1117241da4837c9e"
+      ]
+    },
+    {
+      "topic": "Social Commentary/Culture",
+      "stance": "Engages with a critical, often cynical but humorous lens. He comments on societal trends, human behavior, and the impact of technology on social interactions, frequently highlighting absurdities or paradoxes.",
+      "evidence_chunk_ids": [
+        "overpowered_0bY3DJsgYbg_2b5a3ec5629c0297",
+        "overpowered_OxjW4qQvQJw_b0b67ffadcef7c4b",
+        "overpowered_hY7S35KmOX8_f2590769b9df9fbb",
+        "sheet_SkU3J2vWUK8_51417abe814a756b",
+        "honestly_mGIw5R6zwMg_fb2eca028344201a"
+      ]
+    },
+    {
+      "topic": "Politics/Regulation",
+      "stance": "Engages cautiously but with clear opinions, particularly regarding tech regulation, free speech, or government policies. His commentary is usually framed around the broader implications rather than partisan endorsements.",
+      "evidence_chunk_ids": [
+        "honestly_xxjIYf6sZ6Y_1ee099aa8af677b2",
+        "overpowered__YyGsZPX24k_4ec5336fae93f428",
+        "overpowered_H0t9btxVCCo_ce6268d206bfcce0",
+        "overpowered_wKRAjI5Kf_c_c6c2b7bb2c628197",
+        "honestly_OtnkeqoUgz0_7c4b953bb395b681"
+      ]
+    }
+  ],
+  "avoided_or_absent": [
+    "Overtly partisan political endorsements or heavy criticism of specific Indian political parties.",
+    "Deeply personal emotional vulnerability without a reflective or humorous framing.",
+    "Uncritical praise or hero-worship without a nuanced, often skeptical, or analytical perspective.",
+    "Highly academic or jargon-heavy language without immediate simplification for a general audience.",
+    "A preachy or moralistic tone; lessons are usually shared as personal observations rather than prescriptive advice.",
+    "Excessive formality in language or presentation; his register is consistently informal and conversational."
+  ],
+  "overall_summary": "Tanmay Bhat's voice is a distinctive blend of informal, conversational, and self-deprecating humor, heavily infused with Hinglish. He navigates complex topics like AI, finance, and content creation with a curious yet critical posture, often simplifying them for a broad audience. His delivery is dynamic, characterized by mixed sentence lengths, rapid-fire jokes, and frequent direct addresses, creating an intimate and engaging experience. He masterfully uses self-deprecation and roasting, often softening the latter with disclaimers or shared vulnerability, while consistently avoiding overtly partisan politics or uncritical praise."
+}
