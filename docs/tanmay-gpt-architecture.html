@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create with Tanmay, Architecture and Implementation Blueprint</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #161922;
+    --panel-2: #1d2130;
+    --text: #e8ecf2;
+    --muted: #9aa3b2;
+    --accent: #ff6b35;
+    --accent-2: #4ade80;
+    --accent-3: #60a5fa;
+    --accent-4: #c084fc;
+    --border: #2a2f3d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 16px;
+  }
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 32px 120px;
+  }
+  header.hero {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+  }
+  .kicker {
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 44px;
+    line-height: 1.15;
+    margin: 0 0 16px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .sub {
+    color: var(--muted);
+    font-size: 18px;
+    max-width: 820px;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .pill {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .pill strong { color: var(--text); }
+  h2 {
+    font-size: 28px;
+    margin: 72px 0 8px;
+    letter-spacing: -0.01em;
+    border-left: 4px solid var(--accent);
+    padding-left: 14px;
+  }
+  h2 .num {
+    color: var(--accent);
+    font-weight: 600;
+    margin-right: 8px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 22px;
+  }
+  h3 {
+    font-size: 20px;
+    margin: 36px 0 12px;
+    color: var(--text);
+  }
+  h4 {
+    font-size: 16px;
+    margin: 24px 0 8px;
+    color: var(--accent-3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  p { margin: 12px 0; color: var(--text); }
+  .lead {
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+  .diagram {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .diagram .mermaid { text-align: center; }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  @media (max-width: 800px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    h1 { font-size: 32px; }
+    .wrap { padding: 24px 16px 80px; }
+  }
+  .tile {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .tile h5 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: var(--accent-2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .tile p { margin: 0; font-size: 14px; color: var(--muted); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--panel-2);
+    color: var(--accent-3);
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  td { color: var(--text); }
+  td code {
+    background: var(--panel-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--accent-2);
+  }
+  ul, ol { padding-left: 22px; }
+  li { margin: 6px 0; color: var(--text); }
+  .callout {
+    background: linear-gradient(135deg, rgba(255,107,53,0.1), rgba(192,132,252,0.06));
+    border: 1px solid rgba(255,107,53,0.3);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+  }
+  .callout h4 {
+    margin-top: 0;
+    color: var(--accent);
+  }
+  .phase-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 32px;
+    margin-bottom: 8px;
+  }
+  .phase-badge {
+    background: var(--accent);
+    color: #0f1115;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .phase-head h3 { margin: 0; }
+  .phase-time {
+    color: var(--muted);
+    font-size: 13px;
+    margin-left: auto;
+  }
+  .toc {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 32px 0 48px;
+  }
+  .toc h3 { margin-top: 0; color: var(--accent); }
+  .toc ol {
+    columns: 2;
+    column-gap: 32px;
+    margin: 0;
+  }
+  .toc li { margin: 6px 0; }
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--border);
+  }
+  .toc a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  @media (max-width: 700px) {
+    .toc ol { columns: 1; }
+  }
+  .stack-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stack-row:last-child { border-bottom: none; }
+  .stack-label {
+    color: var(--accent-4);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .stack-value { color: var(--text); font-size: 14px; }
+  .stack-value code {
+    background: var(--panel-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+  .legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .legend .dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .feature-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 14px 0;
+  }
+  .feature-card h4 {
+    margin-top: 0;
+    color: var(--accent-2);
+  }
+  .risk {
+    background: rgba(239, 68, 68, 0.08);
+    border-left: 3px solid #ef4444;
+    padding: 14px 18px;
+    border-radius: 6px;
+    margin: 14px 0;
+    color: var(--text);
+  }
+  .risk strong { color: #fca5a5; }
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+  footer {
+    color: var(--muted);
+    text-align: center;
+    font-size: 13px;
+    margin-top: 80px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">Project Blueprint, v1.0</div>
+  <h1>Create with Tanmay</h1>
+  <div class="sub">A licensed creator-persona platform that ingests Tanmay Bhat's full digital footprint and powers three creator tools: Content Generation, Ad Generation, and How Would Tanmay Answer.</div>
+  <div class="meta">
+    <div class="pill">Owner, <strong>Amlan</strong></div>
+    <div class="pill">Date, <strong>April 20, 2026</strong></div>
+    <div class="pill">Stack, <strong>Next.js + FastAPI + Claude + Qdrant</strong></div>
+    <div class="pill">Status, <strong>Design phase</strong></div>
+  </div>
+</header>
+
+<nav class="toc">
+  <h3>Contents</h3>
+  <ol>
+    <li><a href="#overview">Product Overview</a></li>
+    <li><a href="#architecture">System Architecture</a></li>
+    <li><a href="#data">Data Ingestion Pipeline</a></li>
+    <li><a href="#rag">RAG & Persona Engine</a></li>
+    <li><a href="#tab1">Tab 1, Content Generation</a></li>
+    <li><a href="#tab2">Tab 2, Ad Generation</a></li>
+    <li><a href="#tab3">Tab 3, How Would Tanmay Answer</a></li>
+    <li><a href="#stack">Exact Tech Stack</a></li>
+    <li><a href="#phases">Implementation Phases</a></li>
+    <li><a href="#deploy">Deployment Topology</a></li>
+    <li><a href="#extras">Extra Features</a></li>
+    <li><a href="#risks">Risks & Guardrails</a></li>
+  </ol>
+</nav>
+
+<section id="overview">
+  <h2><span class="num">01</span>Product Overview</h2>
+  <p class="lead">Three creator tools, one persona core. Every tab talks to the same knowledge store and persona engine, but with a different prompt strategy, retrieval shape, and output schema.</p>
+
+  <div class="grid-3">
+    <div class="tile">
+      <h5>Tab 1, Content Generation</h5>
+      <p>Input: content idea. Output: script + description written the way Tanmay would approach the topic.</p>
+    </div>
+    <div class="tile">
+      <h5>Tab 2, Ad Generation</h5>
+      <p>Input: product, duration, cast, celebs. Output: full ad script + strategic rationale in Tanmay's branded-content voice.</p>
+    </div>
+    <div class="tile">
+      <h5>Tab 3, Q&A</h5>
+      <p>Input: any question. Output: Tanmay-grounded answer with citations, or an honest "he has never talked about this".</p>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <h2><span class="num">02</span>High-Level System Architecture</h2>
+  <p class="lead">Five logical layers. Data flows up from ingestion to application, user requests flow down from the UI and loop back with evaluation signals.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart TB
+    subgraph UI["Layer 5, Application / UI"]
+        FE["Next.js Frontend<br/>3 Tabs + Streaming"]
+        API["FastAPI Backend<br/>REST + SSE"]
+    end
+    subgraph AI["Layer 4, AI & Persona Core"]
+        ORCH["RAG Orchestrator"]
+        PERSONA["Tanmay Persona<br/>System Prompt"]
+        LLM["Claude Sonnet 4.6<br/>+ Opus 4.6 premium"]
+        RERANK["Cohere Rerank 3"]
+    end
+    subgraph KNOW["Layer 3, Knowledge Store"]
+        VDB[("Qdrant<br/>Vector DB")]
+        PG[("Postgres<br/>Metadata + Users")]
+        REDIS[("Redis<br/>Cache + Queue")]
+        R2[("Cloudflare R2<br/>Raw Media")]
+    end
+    subgraph PROC["Layer 2, Processing"]
+        TRANS["Deepgram<br/>Transcribe + Diarize"]
+        CLEAN["Text Cleaner<br/>+ Chunker"]
+        TAG["LLM Tagger<br/>Claude Haiku"]
+        EMB["Voyage-3<br/>Embeddings"]
+    end
+    subgraph INGEST["Layer 1, Ingestion"]
+        YT["YouTube<br/>yt-dlp + transcript-api"]
+        X["X / Twitter<br/>Apify"]
+        LI["LinkedIn<br/>Apify"]
+        IG["Instagram<br/>Apify"]
+        PC["Podcasts<br/>RSS + Download"]
+        EV["Events<br/>Manual curation"]
+    end
+
+    INGEST --> PROC
+    PROC --> KNOW
+    KNOW --> AI
+    AI --> UI
+    UI -->|Feedback loop| AI
+    AI -->|Logs| PG
+
+    style UI fill:#e3f2fd,stroke:#1976d2,color:#0d47a1
+    style AI fill:#fff3e0,stroke:#f57c00,color:#e65100
+    style KNOW fill:#f3e5f5,stroke:#7b1fa2,color:#4a148c
+    style PROC fill:#e8f5e9,stroke:#388e3c,color:#1b5e20
+    style INGEST fill:#fce4ec,stroke:#c2185b,color:#880e4f
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>Design Principle</h4>
+    <p>Keep "know Tanmay" (knowledge store) strictly separated from "act as Tanmay" (persona engine). The knowledge store is retrieval-only and factual. The persona engine is stylistic and opinionated. Mixing them couples data quality with voice quality, which makes debugging a nightmare.</p>
+  </div>
+</section>
+
+<section id="data">
+  <h2><span class="num">03</span>Data Ingestion & Processing Pipeline</h2>
+  <p class="lead">Every piece of Tanmay content flows through the same four-stage pipeline. Workers are async, idempotent, and checkpointed so a failure mid-batch does not force a full re-run.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart LR
+    A[Source Registry<br/>YAML config] --> B{Dispatcher}
+    B --> C1[YouTube Worker]
+    B --> C2[Podcast Worker]
+    B --> C3[X Worker]
+    B --> C4[LinkedIn Worker]
+    B --> C5[Instagram Worker]
+
+    C1 --> D[R2 Raw Storage<br/>+ Manifest]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+    C5 --> D
+
+    D --> E{Has Transcript?}
+    E -->|Yes| G[Text Cleaner]
+    E -->|No, audio/video| F[Deepgram<br/>Transcribe + Diarize]
+    F --> F2[Keep Tanmay<br/>utterances only]
+    F2 --> G
+
+    G --> H[Semantic Chunker<br/>400-800 tokens]
+    H --> I[Claude Haiku Tagger<br/>topic, register, language]
+    I --> J[Voyage-3 Embedder]
+    J --> K[("Qdrant Upsert<br/>+ metadata")]
+    I --> L[("Postgres<br/>chunk_metadata")]
+
+    style A fill:#fff9c4,color:#000
+    style D fill:#ffccbc,color:#000
+    style K fill:#c8e6c9,color:#000
+    style L fill:#c8e6c9,color:#000
+    </div>
+  </div>
+
+  <h3>Source Registry Schema</h3>
+  <div class="card">
+    <table>
+      <tr><th>Field</th><th>Example</th><th>Purpose</th></tr>
+      <tr><td><code>source_id</code></td><td>yt_honestly_ep_042</td><td>Deterministic primary key</td></tr>
+      <tr><td><code>platform</code></td><td>youtube</td><td>Routing + platform-specific parsing</td></tr>
+      <tr><td><code>url</code></td><td>https://youtu.be/...</td><td>Citation back-link</td></tr>
+      <tr><td><code>format</code></td><td>long_podcast</td><td>long_podcast, reel, tweet, thread, stage, ad</td></tr>
+      <tr><td><code>published_at</code></td><td>2025-09-14</td><td>Timeline ordering + freshness weighting</td></tr>
+      <tr><td><code>co_hosts</code></td><td>["Rohan Joshi"]</td><td>Enables "Tanmay only" filtering</td></tr>
+      <tr><td><code>sponsor</code></td><td>null OR brand_name</td><td>Excludes sponsored reads from default retrieval</td></tr>
+    </table>
+  </div>
+</section>
+
+<section id="rag">
+  <h2><span class="num">04</span>RAG & Persona Engine</h2>
+  <p class="lead">The RAG orchestrator is the beating heart. Every tab calls it with a different query shape and retrieval policy, but the core flow is the same.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart TB
+    U[User Request<br/>tab + payload] --> V[Query Builder<br/>per-tab strategy]
+    V --> W[Hybrid Retrieval]
+    W --> W1[Semantic Search<br/>Qdrant top-50]
+    W --> W2[BM25 Keyword<br/>Postgres FTS]
+    W1 --> X[Fusion<br/>Reciprocal Rank]
+    W2 --> X
+    X --> Y[Cohere Rerank 3<br/>top-12]
+    Y --> Z{Confidence<br/>check}
+    Z -->|Low + Tab 3| ABORT[Return<br/>Tanmay has not<br/>spoken on this]
+    Z -->|OK| AA[Style Exemplar<br/>Retrieval, 3-5]
+    AA --> BB[Prompt Composer<br/>Persona + Context + Input]
+    BB --> CC[Claude Streaming<br/>Sonnet 4.6 or Opus 4.6]
+    CC --> DD[Output Parser<br/>script, description, citations]
+    DD --> EE[Stream to UI<br/>SSE]
+    DD --> FF[(Langfuse<br/>Trace + Eval)]
+
+    style U fill:#bbdefb,color:#000
+    style ABORT fill:#ffcdd2,color:#000
+    style EE fill:#c8e6c9,color:#000
+    </div>
+  </div>
+
+  <h3>Persona Prompt Anatomy</h3>
+  <div class="card">
+    <p>The system prompt is a living document, version-controlled like code, A/B tested like a feature flag. It has six sections:</p>
+    <ol>
+      <li><strong>Identity anchor.</strong> Who Tanmay is, what he stands for, the tone ceiling and floor.</li>
+      <li><strong>Voice patterns.</strong> Sentence rhythm, Hinglish ratio, typical openings, callback humor, self-deprecation cadence.</li>
+      <li><strong>Topic posture.</strong> How he engages with AI, mental health, creator economy, cricket, finance curiosity, and what he avoids.</li>
+      <li><strong>Format rules.</strong> Per-tab output schema (script vs ad vs answer).</li>
+      <li><strong>Retrieved context.</strong> Ranked chunks with source metadata.</li>
+      <li><strong>Style exemplars.</strong> 3 to 5 short high-voice snippets for few-shot anchoring.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="tab1">
+  <h2><span class="num">05</span>Tab 1, Content Generation</h2>
+  <p class="lead">Creator types an idea, gets a script plus a "how he would have thought about it" rationale.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart LR
+    I1[Idea Input<br/>+ format + length] --> I2[Expand Idea<br/>Claude Haiku]
+    I2 --> I3[Semantic Query:<br/>similar-topic chunks]
+    I3 --> I4[Retrieve top-12<br/>from Qdrant]
+    I4 --> I5[Rerank]
+    I5 --> I6[Fetch 5 style exemplars<br/>matching format]
+    I6 --> I7[Compose Prompt]
+    I7 --> I8[Claude Sonnet 4.6<br/>streaming]
+    I8 --> I9[Parse Output]
+    I9 --> I10a[Script Block]
+    I9 --> I10b[Rationale Block]
+    I9 --> I10c[Citations]
+    I10a --> I11[UI Render]
+    I10b --> I11
+    I10c --> I11
+    I11 --> I12{User Feedback<br/>thumbs / regenerate}
+    I12 -->|Regen with tone| I7
+    I12 -->|Save| I13[(History)]
+
+    style I1 fill:#bbdefb,color:#000
+    style I11 fill:#c8e6c9,color:#000
+    </div>
+  </div>
+</section>
+
+<section id="tab2">
+  <h2><span class="num">06</span>Tab 2, Ad Generation</h2>
+  <p class="lead">Structured inputs, structured output. This is the tab where retrieval strategy matters most, you want to pull Tanmay's actual branded reads, not his podcasts.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart TB
+    A1[Structured Form<br/>product, desc, people,<br/>celebs, duration, lang] --> A2[Validator<br/>word count = duration/WPM]
+    A2 --> A3[Filter Retrieval:<br/>format in ad, branded, reel]
+    A3 --> A4[Category Match<br/>find similar product category ads]
+    A4 --> A5[Retrieve 10 ad exemplars]
+    A5 --> A6[Brand-Safety Check<br/>conflicts with past refusals?]
+    A6 -->|Flag| A7[Warn User]
+    A6 -->|Clear| A8[Compose Ad Prompt]
+    A8 --> A9[Claude Sonnet 4.6]
+    A9 --> A10[Structured Output<br/>JSON schema enforced]
+    A10 --> A11[Scene-by-Scene Script]
+    A10 --> A12[Character Lines]
+    A10 --> A13[Pacing + Direction Notes]
+    A10 --> A14[Strategy Rationale]
+    A11 --> A15[UI Render]
+    A12 --> A15
+    A13 --> A15
+    A14 --> A15
+    A15 --> A16[Export MDX / PDF / Fountain]
+
+    style A1 fill:#bbdefb,color:#000
+    style A6 fill:#fff9c4,color:#000
+    style A15 fill:#c8e6c9,color:#000
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>Why the Brand-Safety Gate Matters</h4>
+    <p>If the user inputs a product in a category Tanmay has publicly refused (say, real-money gaming or sketchy crypto), the system should flag it before generating. This protects both the licensing deal and the user's credibility.</p>
+  </div>
+</section>
+
+<section id="tab3">
+  <h2><span class="num">07</span>Tab 3, How Would Tanmay Answer This</h2>
+  <p class="lead">The tab most at risk of hallucination, so the hard rule is: if confidence is below threshold, refuse honestly. Every answer ships with citations.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart TB
+    Q1[Question Input] --> Q2[Query Expansion<br/>generate 3 paraphrases]
+    Q2 --> Q3[Multi-Query Retrieval<br/>Qdrant + BM25]
+    Q3 --> Q4[Rerank top-50 to top-12]
+    Q4 --> Q5{Max similarity<br/>greater than threshold?}
+    Q5 -->|No| Q6[Return:<br/>Tanmay has never<br/>talked about this]
+    Q5 -->|Yes| Q7[Grounded Generation<br/>Claude Sonnet 4.6<br/>temp 0.4]
+    Q7 --> Q8[Citation Verifier<br/>each claim must<br/>map to a chunk]
+    Q8 -->|Unverified| Q9[Strip unverified<br/>claim]
+    Q8 -->|Verified| Q10[Assemble Answer]
+    Q9 --> Q10
+    Q10 --> Q11[Render with<br/>inline citations]
+    Q11 --> Q12[Clickable sources:<br/>episode + timestamp<br/>or post URL]
+
+    style Q1 fill:#bbdefb,color:#000
+    style Q6 fill:#ffcdd2,color:#000
+    style Q12 fill:#c8e6c9,color:#000
+    </div>
+  </div>
+</section>
+
+<section id="stack">
+  <h2><span class="num">08</span>Exact Tech Stack</h2>
+  <p class="lead">Every choice below is what I would actually ship with in 2026. Where I list an alternative, the first option is the default.</p>
+
+  <h3>Frontend</h3>
+  <div class="card">
+    <div class="stack-row"><div class="stack-label">Framework</div><div class="stack-value"><code>Next.js 14</code> (App Router) with <code>TypeScript</code>. Alt: Remix.</div></div>
+    <div class="stack-row"><div class="stack-label">Styling</div><div class="stack-value"><code>TailwindCSS</code> + <code>shadcn/ui</code> + <code>Framer Motion</code> for micro-interactions.</div></div>
+    <div class="stack-row"><div class="stack-label">Streaming</div><div class="stack-value"><code>Vercel AI SDK</code> for SSE handling and token streaming.</div></div>
+    <div class="stack-row"><div class="stack-label">Forms</div><div class="stack-value"><code>react-hook-form</code> + <code>zod</code> for validation.</div></div>
+    <div class="stack-row"><div class="stack-label">State</div><div class="stack-value"><code>Zustand</code> for client state, <code>TanStack Query</code> for server state.</div></div>
+    <div class="stack-row"><div class="stack-label">Rich editor</div><div class="stack-value"><code>Tiptap</code> for editing generated scripts inline.</div></div>
+  </div>
+
+  <h3>Backend</h3>
+  <div class="card">
+    <div class="stack-row"><div class="stack-label">API framework</div><div class="stack-value"><code>FastAPI</code> (Python 3.12) with <code>Pydantic v2</code>. Alt: NestJS if you want TS end to end.</div></div>
+    <div class="stack-row"><div class="stack-label">Orchestration</div><div class="stack-value"><code>LangGraph</code> for the RAG DAG. Alt: hand-rolled if you want full control.</div></div>
+    <div class="stack-row"><div class="stack-label">Queue + Workers</div><div class="stack-value"><code>Celery</code> + <code>Redis</code> broker for ingestion and transcription jobs.</div></div>
+    <div class="stack-row"><div class="stack-label">Scheduled jobs</div><div class="stack-value"><code>Celery Beat</code> for weekly re-crawls of Tanmay's active platforms.</div></div>
+  </div>
+
+  <h3>AI & ML</h3>
+  <div class="card">
+    <div class="stack-row"><div class="stack-label">Primary LLM</div><div class="stack-value"><code>Claude Sonnet 4.6</code> via Anthropic API.</div></div>
+    <div class="stack-row"><div class="stack-label">Premium LLM</div><div class="stack-value"><code>Claude Opus 4.6</code> for paying tier + high-stakes ad generation.</div></div>
+    <div class="stack-row"><div class="stack-label">Utility LLM</div><div class="stack-value"><code>Claude Haiku 4.5</code> for tagging, query expansion, cheap classification.</div></div>
+    <div class="stack-row"><div class="stack-label">Embeddings</div><div class="stack-value"><code>Voyage-3</code> (1024d). Alt: <code>text-embedding-3-large</code>.</div></div>
+    <div class="stack-row"><div class="stack-label">Reranker</div><div class="stack-value"><code>Cohere Rerank 3</code> for the final top-k squeeze.</div></div>
+    <div class="stack-row"><div class="stack-label">Transcription</div><div class="stack-value"><code>Deepgram Nova-3</code> with diarization. Alt: <code>Whisper large-v3</code> self-hosted.</div></div>
+    <div class="stack-row"><div class="stack-label">Voice synthesis</div><div class="stack-value"><code>ElevenLabs Voice Clone</code> (licensed). Premium feature only.</div></div>
+  </div>
+
+  <h3>Data Layer</h3>
+  <div class="card">
+    <div class="stack-row"><div class="stack-label">Vector DB</div><div class="stack-value"><code>Qdrant</code> self-hosted on Hetzner or Fly. Alt: Pinecone managed.</div></div>
+    <div class="stack-row"><div class="stack-label">Relational DB</div><div class="stack-value"><code>Postgres 16</code> via <code>Supabase</code> or <code>Neon</code>.</div></div>
+    <div class="stack-row"><div class="stack-label">Cache</div><div class="stack-value"><code>Upstash Redis</code>, serverless.</div></div>
+    <div class="stack-row"><div class="stack-label">Object storage</div><div class="stack-value"><code>Cloudflare R2</code> for transcripts + raw media (zero egress fees).</div></div>
+    <div class="stack-row"><div class="stack-label">Full-text search</div><div class="stack-value">Postgres <code>tsvector</code> + <code>GIN</code> indexes for BM25-style keyword retrieval.</div></div>
+  </div>
+
+  <h3>Ingestion Tooling</h3>
+  <div class="card">
+    <div class="stack-row"><div class="stack-label">YouTube</div><div class="stack-value"><code>yt-dlp</code> + <code>youtube-transcript-api</code>.</div></div>
+    <div class="stack-row"><div class="stack-label">X / Twitter</div><div class="stack-value"><code>Apify</code> Tweet Scraper actor.</div></div>
+    <div class="stack-row"><div class="stack-label">LinkedIn</div><div class="stack-value"><code>Apify</code> LinkedIn Profile Posts actor.</div></div>
+    <div class="stack-row"><div class="stack-label">Instagram</div><div class="stack-value"><code>Apify</code> Instagram Scraper.</div></div>
+    <div class="stack-row"><div class="stack-label">Podcasts</div><div class="stack-value">RSS feed parser + direct MP3 download.</div></div>
+    <div class="stack-row"><div class="stack-label">Generic scraping</div><div class="stack-value"><code>Playwright</code> for bespoke sites.</div></div>
+  </div>
+
+  <h3>DevOps, Observability, Auth</h3>
+  <div class="card">
+    <div class="stack-row"><div class="stack-label">Frontend hosting</div><div class="stack-value"><code>Vercel</code>.</div></div>
+    <div class="stack-row"><div class="stack-label">Backend hosting</div><div class="stack-value"><code>Railway</code> or <code>Fly.io</code>. Alt: AWS ECS if you need to scale seriously.</div></div>
+    <div class="stack-row"><div class="stack-label">Auth</div><div class="stack-value"><code>Clerk</code>. Alt: Auth.js with Google + email OTP.</div></div>
+    <div class="stack-row"><div class="stack-label">Payments</div><div class="stack-value"><code>Razorpay</code> (India-first) + <code>Stripe</code> (international).</div></div>
+    <div class="stack-row"><div class="stack-label">LLM observability</div><div class="stack-value"><code>Langfuse</code> self-hosted for traces, evals, cost tracking.</div></div>
+    <div class="stack-row"><div class="stack-label">App analytics</div><div class="stack-value"><code>PostHog</code> Cloud.</div></div>
+    <div class="stack-row"><div class="stack-label">Error tracking</div><div class="stack-value"><code>Sentry</code>.</div></div>
+    <div class="stack-row"><div class="stack-label">CI/CD</div><div class="stack-value"><code>GitHub Actions</code>.</div></div>
+    <div class="stack-row"><div class="stack-label">IaC</div><div class="stack-value"><code>Terraform</code> for anything on AWS/Cloudflare.</div></div>
+    <div class="stack-row"><div class="stack-label">Evals</div><div class="stack-value"><code>Promptfoo</code> + <code>Langfuse datasets</code> for style-match scoring.</div></div>
+  </div>
+</section>
+
+<section id="phases">
+  <h2><span class="num">09</span>Implementation Phases, Week by Week</h2>
+  <p class="lead">Ten phases, roughly one per week for a solo build or parallelizable to 4-6 weeks with a small team.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+gantt
+    title Implementation Timeline, 10 weeks
+    dateFormat  YYYY-MM-DD
+    axisFormat  W%V
+    section Legal
+    Licensing + IP agreement     :a0, 2026-04-27, 7d
+    section Data
+    Source registry + scrapers   :a1, 2026-04-27, 10d
+    Transcription backfill       :a2, after a1, 7d
+    Chunk + embed + tag          :a3, after a2, 5d
+    section Persona
+    Voice analysis + prompt      :a4, after a3, 5d
+    Style exemplar curation      :a5, after a4, 3d
+    section Backend
+    FastAPI + RAG orchestrator   :a6, after a4, 10d
+    Tab 1 endpoint               :a7, after a6, 4d
+    Tab 2 endpoint               :a8, after a7, 4d
+    Tab 3 endpoint               :a9, after a8, 4d
+    section Frontend
+    Next.js scaffold + auth      :a10, 2026-05-11, 7d
+    Three tab UIs + streaming    :a11, after a10, 10d
+    History + export             :a12, after a11, 4d
+    section Launch
+    Evals + red team             :a13, after a9, 7d
+    Private beta                 :a14, after a13, 7d
+    Public launch                :a15, after a14, 3d
+    </div>
+  </div>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 00</div>
+    <h3>Legal Foundation</h3>
+    <div class="phase-time">1 week, non-negotiable</div>
+  </div>
+  <p>Engage an IP lawyer. Draft a licensing agreement covering training data use, likeness rights, revenue share, territory, term, termination, and off-limits topics. Get signatures before a single scraper runs.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 01</div>
+    <h3>Data Collection</h3>
+    <div class="phase-time">1.5 weeks</div>
+  </div>
+  <p>Build the source registry YAML. Write and run platform-specific scrapers. Store raw payloads in R2 with manifest files. Target volume: 500+ hours of audio/video, 2000+ posts. De-dupe by URL hash. Checkpoint every 50 items.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 02</div>
+    <h3>Transcription & Diarization</h3>
+    <div class="phase-time">1 week</div>
+  </div>
+  <p>Batch-submit all audio/video to Deepgram with diarization enabled. Post-process to isolate Tanmay's speaker-label across the corpus. Store aligned transcripts (word + timestamp) so the UI can cite back to the exact second of a clip.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 03</div>
+    <h3>Chunking, Tagging, Embedding</h3>
+    <div class="phase-time">1 week</div>
+  </div>
+  <p>Semantic chunker that splits at topic shifts, not fixed sizes. Run a Claude Haiku pass over every chunk to tag: topic, format, register (roast, reflective, informative, comedic), language mix, named entities, sentiment. Embed with Voyage-3, upsert into Qdrant with full metadata. Build a separate "style-exemplar" collection for few-shot prompting.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 04</div>
+    <h3>Persona Engineering</h3>
+    <div class="phase-time">1 week</div>
+  </div>
+  <p>This is craft work, not engineering. Hand-analyze 50 to 100 prime Tanmay pieces to extract voice patterns. Write the persona system prompt. Validate via blind test: mix 20 generated outputs with 20 real Tanmay pieces, have Tanmay fans try to tell them apart. Target accuracy near 50% (indistinguishable).</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 05</div>
+    <h3>Backend, RAG Core + Tab 1</h3>
+    <div class="phase-time">1.5 weeks</div>
+  </div>
+  <p>FastAPI scaffold. LangGraph RAG orchestrator. Implement <code>POST /generate/content</code> end to end with streaming. Plug in Langfuse tracing. Ship Tab 1 as the MVP because it is the cheapest to validate and the most forgiving of imperfect retrieval.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 06</div>
+    <h3>Tab 2, Ad Generation</h3>
+    <div class="phase-time">1 week</div>
+  </div>
+  <p>Structured form schema. Duration-to-wordcount validator. Brand-safety gate that flags category conflicts. Retrieval filter limited to ads and branded content. Structured JSON output enforced via tool use. Export formats: Markdown, PDF, Fountain (screenplay format).</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 07</div>
+    <h3>Tab 3, Q&A with Citations</h3>
+    <div class="phase-time">1 week</div>
+  </div>
+  <p>Multi-query retrieval with paraphrase expansion. Confidence threshold gate. Citation verifier that maps every factual claim back to a source chunk and strips unverified claims. Clickable source UI with timestamp deep-links for YouTube and post URLs for text platforms.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 08</div>
+    <h3>Frontend</h3>
+    <div class="phase-time">parallel, 2 weeks</div>
+  </div>
+  <p>Next.js App Router with one route per tab. Streaming via Vercel AI SDK. Shared history sidebar. Copy, export, regenerate-with-different-tone. Tone dial component. Responsive design, mobile-first.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 09</div>
+    <h3>Evals & Red-Teaming</h3>
+    <div class="phase-time">1 week</div>
+  </div>
+  <p>Golden set of 100 prompts per tab with expert ratings. Automated style-match score using embedding similarity to the real Tanmay corpus. Red-team for off-brand outputs, defamation risk, sponsor conflicts, and sensitive topics. Any failure patterns feed back into persona prompt v2.</p>
+
+  <div class="phase-head">
+    <div class="phase-badge">PHASE 10</div>
+    <h3>Private Beta + Launch</h3>
+    <div class="phase-time">2 weeks</div>
+  </div>
+  <p>Invite 50 creators, instrument every generation with Langfuse, daily prompt iteration. Pricing tiers live. Public launch with a launch video (ideally starring Tanmay himself).</p>
+</section>
+
+<section id="deploy">
+  <h2><span class="num">10</span>Deployment Topology</h2>
+  <p class="lead">Where each piece physically lives in production.</p>
+
+  <div class="diagram">
+    <div class="mermaid">
+flowchart TB
+    subgraph VER[Vercel Edge]
+        NJS[Next.js App]
+    end
+    subgraph RW[Railway or Fly.io, Mumbai region]
+        APIG[FastAPI gateway]
+        WORKERS[Celery workers x4]
+    end
+    subgraph HETZ[Hetzner VPS]
+        QD[Qdrant cluster, 3 nodes]
+    end
+    subgraph MANAGED[Managed Services]
+        SB[(Supabase Postgres)]
+        UP[(Upstash Redis)]
+        R2[(Cloudflare R2)]
+    end
+    subgraph APIS[External APIs]
+        ANTH[Anthropic API]
+        VOY[Voyage AI]
+        COH[Cohere]
+        DG[Deepgram]
+        CLK[Clerk]
+        EL[ElevenLabs]
+    end
+
+    USER[End User] --> NJS
+    NJS -->|SSE| APIG
+    APIG --> SB
+    APIG --> UP
+    APIG --> QD
+    APIG --> ANTH
+    APIG --> VOY
+    APIG --> COH
+    APIG --> EL
+    WORKERS --> DG
+    WORKERS --> R2
+    WORKERS --> QD
+    WORKERS --> SB
+    NJS --> CLK
+
+    style VER fill:#e1f5fe,color:#000
+    style RW fill:#fff3e0,color:#000
+    style HETZ fill:#f3e5f5,color:#000
+    style MANAGED fill:#e8f5e9,color:#000
+    style APIS fill:#fce4ec,color:#000
+    </div>
+  </div>
+</section>
+
+<section id="extras">
+  <h2><span class="num">11</span>Extra Features</h2>
+  <p class="lead">Features that turn this from a clever demo into a product people pay for.</p>
+
+  <div class="feature-card">
+    <h4>01, Source-Grounded Citations</h4>
+    <p>Every generation shows the chunks it drew from. Click a citation, it opens the original YouTube clip at the exact timestamp or the original tweet. This is trust, defensibility, and a differentiator all in one.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>02, Tone Dial</h4>
+    <p>Sliders for roast-level, chaos, depth, and Hinglish ratio. Lets creators tune output without rewriting prompts. Each slider maps to a specific prompt variable that gets injected into the composer.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>03, Voice Output (Premium)</h4>
+    <p>ElevenLabs voice clone (licensed, watermarked). Generated scripts become audio previews. Premium-tier only, with per-minute metering.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>04, Why This Works Panel</h4>
+    <p>Alongside every generation, a short meta-explanation of which Tanmay techniques were applied (callback humor, self-deprecation, pattern interrupt, audience misdirection). Turns the product into a creator-education tool.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>05, Timeline Explorer</h4>
+    <p>"Show me how Tanmay's take on AI evolved from 2019 to 2026." Pulls from the corpus chronologically with a visual timeline. Shareable, viral-friendly, and cheap to build on top of existing metadata.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>06, Collaboration Mode</h4>
+    <p>Two users co-edit a script in real time. AI suggestions inline via Tiptap + Yjs (CRDT). Useful for writer-creator pairs.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>07, Brand-Safety Guardrails</h4>
+    <p>Auto-flag if the product category in Tab 2 conflicts with things Tanmay has publicly refused (gambling, misleading financial products, etc.). Maintained as a rules file + semantic match against his historical refusals.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>08, Prompt Template Library</h4>
+    <p>Community-submitted prompt packs, upvoted. Starter templates like "Diwali brand campaign", "Roast my startup pitch", "Reaction to a trending clip". Templates are composable with the tone dial.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>09, Chrome Extension</h4>
+    <p>Highlight any text on the web, right-click "What would Tanmay say about this". Opens a side panel with the Tab 3 response. Great acquisition surface.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>10, Creator Analytics Loop</h4>
+    <p>If the user posts a generated script, a webhook or manual log feeds the performance data (views, retention) back. Over time you learn which prompt patterns actually move metrics, which is a moat.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>11, Agency API Access</h4>
+    <p>REST API for ad agencies pitching Tanmay-style campaigns. Priced per call, gated by a stricter brand-safety filter. This is likely the highest-ARPU channel.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>12, Multi-Creator Platform (V2)</h4>
+    <p>The same architecture generalizes. Once it works for Tanmay, the pipeline can onboard any licensed creator. The product becomes a marketplace: licensed creators get a rev-share, users get many voices. This is the actual business.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>13, Prompt-to-Storyboard</h4>
+    <p>For Tab 2 ads, auto-generate a storyboard using an image model for each scene direction. Creators go from idea to shootable visual brief in one click.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>14, Community Remix Feed</h4>
+    <p>Public generations (opt-in) go to a feed where other users can remix, vote, and share. Creates social proof and organic discovery.</p>
+  </div>
+
+  <div class="feature-card">
+    <h4>15, Weekly Tanmay Digest</h4>
+    <p>Automated weekly email: "Here is what new content Tanmay published and what the GPT thinks are the key patterns in it." Keeps users engaged without requiring a daily habit.</p>
+  </div>
+</section>
+
+<section id="risks">
+  <h2><span class="num">12</span>Risks & Guardrails</h2>
+
+  <div class="risk">
+    <strong>Legal:</strong> Building this without a signed license from Tanmay or his team is the single biggest risk. Publicity rights, likeness, and platform ToS all apply. Phase 00 is not optional.
+  </div>
+
+  <div class="risk">
+    <strong>Hallucination in Tab 3:</strong> Users will ask things Tanmay has never discussed. The confidence gate + citation verifier must be strict. Better to refuse than to fabricate.
+  </div>
+
+  <div class="risk">
+    <strong>Sensitive topics:</strong> Politics, religion, personal relationships, mental-health advice. The persona prompt must hard-refuse these even if retrieval returns relevant chunks. This protects Tanmay's reputation, which is literally the product.
+  </div>
+
+  <div class="risk">
+    <strong>Cost runaway:</strong> LLM spend scales linearly with success. Rate limits, per-user quotas, aggressive caching of common queries, and tiered pricing are non-optional.
+  </div>
+
+  <div class="risk">
+    <strong>Stale corpus:</strong> Tanmay keeps creating. Weekly re-crawl via Celery Beat. Monitor embedding drift. Without this, the system slowly falls behind his current voice.
+  </div>
+
+  <div class="risk">
+    <strong>Voice clone abuse:</strong> If you ship ElevenLabs voice, watermark every audio output, require consent on every generation, and maintain a takedown pipeline for misuse.
+  </div>
+</section>
+
+<hr>
+
+<footer>
+  Create with Tanmay, Architecture Blueprint. Built for Amlan. Start with Phase 00. Ship Tab 3 first.
+</footer>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#ff6b35',
+      primaryTextColor: '#0f1115',
+      primaryBorderColor: '#c2185b',
+      lineColor: '#555',
+      fontFamily: 'Inter, -apple-system, sans-serif',
+      fontSize: '14px'
+    },
+    flowchart: { curve: 'basis', padding: 20 },
+    gantt: { fontSize: 12 }
+  });
+</script>
+</body>
+</html>

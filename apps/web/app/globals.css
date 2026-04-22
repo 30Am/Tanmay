@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: #0f1115;
+  color: #e8ecf2;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: #2a2f3d;
+  border-radius: 3px;
+}

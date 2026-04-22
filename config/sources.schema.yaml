@@ -1,0 +1,35 @@
+# JSON Schema (YAML) for sources.yaml
+$schema: "https://json-schema.org/draft/2020-12/schema"
+type: object
+required: [version, sources]
+properties:
+  version:
+    type: integer
+  defaults:
+    type: object
+    properties:
+      checkpoint_every: { type: integer, minimum: 1 }
+      retry_max: { type: integer, minimum: 0 }
+  sources:
+    type: array
+    items:
+      type: object
+      required: [source_id, platform, url, format, enabled]
+      properties:
+        source_id: { type: string, pattern: "^[a-z0-9_]+$" }
+        platform:
+          type: string
+          enum: [youtube, x, linkedin, instagram, podcast, event, other]
+        kind:
+          type: string
+          enum: [channel, profile, rss, video, post, manual]
+        url: { type: string, format: uri }
+        format:
+          type: string
+          enum: [long_podcast, reel, tweet, thread, stage, ad, branded, interview]
+        co_hosts:
+          type: array
+          items: { type: string }
+        sponsor: { type: [string, "null"] }
+        apify_actor: { type: string }
+        enabled: { type: boolean }

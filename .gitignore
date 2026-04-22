@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Data outputs (big binary + logs — recomputable, don't commit)
+.cache/
+data/raw/
+data/logs/
+*.log
+
+# Qdrant (local binary + storage)
+infra/qdrant/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/

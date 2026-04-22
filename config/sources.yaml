@@ -1,0 +1,90 @@
+# Source Registry — Create with Tanmay
+# The dispatcher reads this file; each entry becomes one ingestion job.
+# Deterministic source_id keys prevent accidental duplication on re-runs.
+
+version: 1
+defaults:
+  checkpoint_every: 50
+  retry_max: 3
+
+sources:
+  # ─── YouTube ──────────────────────────────────────────────────────────────
+  - source_id: yt_channel_honestly
+    platform: youtube
+    kind: channel
+    url: https://www.youtube.com/channel/UCneQdPbDLwZ__ZXP0YVwiag  # @HonestlybyTanmayBhat
+    format: long_podcast
+    co_hosts: []
+    sponsor: null
+    enabled: true
+
+  - source_id: yt_channel_tanmaybhat
+    platform: youtube
+    kind: channel
+    url: https://www.youtube.com/@tanmaybhat
+    format: reel
+    co_hosts: []
+    sponsor: null
+    enabled: false  # phase 01 scope: Honestly + Overpowered + curated sheet only
+
+  - source_id: yt_channel_overpowered
+    platform: youtube
+    kind: channel
+    url: https://www.youtube.com/@AI.Overpowered
+    format: long_podcast
+    co_hosts: [varun_mayya]
+    sponsor: null
+    filter: tanmay_present  # include only videos where Tanmay appears in title/desc/tags
+    enabled: true
+
+  - source_id: yt_sheet_curated
+    platform: youtube
+    kind: url_list
+    url: https://docs.google.com/spreadsheets/d/18YM_4kGJbmeMNQBg0ORRFKVkDJA_Wzd32zVFFwtjZ8Y/
+    format: long_podcast
+    co_hosts: []
+    sponsor: null
+    enabled: true
+
+  # ─── Podcasts (RSS) ───────────────────────────────────────────────────────
+  - source_id: pc_honestly_rss
+    platform: podcast
+    kind: rss
+    url: https://anchor.fm/s/honestly/podcast/rss  # placeholder, update with real feed
+    format: long_podcast
+    enabled: false
+
+  # ─── X / Twitter ──────────────────────────────────────────────────────────
+  - source_id: x_tanmaybhat
+    platform: x
+    kind: profile
+    url: https://x.com/thetanmay
+    format: tweet
+    apify_actor: apidojo/tweet-scraper
+    enabled: true
+
+  # ─── LinkedIn ─────────────────────────────────────────────────────────────
+  - source_id: li_tanmaybhat
+    platform: linkedin
+    kind: profile
+    url: https://www.linkedin.com/in/tanmaybhat/
+    format: thread
+    apify_actor: apify/linkedin-profile-posts
+    enabled: true
+
+  # ─── Instagram ────────────────────────────────────────────────────────────
+  - source_id: ig_thetanmay
+    platform: instagram
+    kind: profile
+    url: https://instagram.com/thetanmay
+    format: reel
+    apify_actor: apify/instagram-scraper
+    enabled: true
+
+  # ─── Events / Stage (manual curation) ─────────────────────────────────────
+  - source_id: event_breakfast_club_2024
+    platform: event
+    kind: manual
+    url: https://example.com/breakfast-club-transcript
+    format: stage
+    enabled: false
