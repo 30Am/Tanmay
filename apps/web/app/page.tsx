@@ -14,6 +14,10 @@ import {
   Waves,
   Youtube,
 } from "lucide-react";
+import Reveal from "@/components/motion/Reveal";
+import TiltCard from "@/components/motion/TiltCard";
+import CountUp from "@/components/motion/CountUp";
+import Marquee from "@/components/motion/Marquee";
 
 const Dot = ({ className = "" }: { className?: string }) => (
   <span className={`inline-block h-1.5 w-1.5 rounded-full ${className}`} />
@@ -40,41 +44,45 @@ function Header() {
 /* ───────────────────── HERO ───────────────────── */
 function Hero() {
   return (
-    <section className="bg-hero relative pt-14 pb-20 md:pt-20 md:pb-28">
+    <section className="bg-hero relative pt-14 pb-20 md:pt-20 md:pb-28 overflow-hidden">
       <div className="wrap text-center">
-        <div className="pill mx-auto">
+        <div className="pill mx-auto hero-rise">
           <Dot className="bg-salmon" />
           <span>LIVE BETA</span>
           <span className="opacity-40">·</span>
           <span>HOW WOULD TANMAY ANSWER JUST SHIPPED</span>
         </div>
         <h1 className="font-serif text-5xl md:text-[76px] leading-[1.02] tracking-tight mt-6">
-          Write like Tanmay.
+          <span className="inline-block hero-rise hero-rise-2">Write like Tanmay.</span>
           <br />
-          <em className="text-gradient-warm italic font-light">Wit, warmth,</em>
+          <em className="inline-block hero-rise hero-rise-3 text-gradient-warm italic font-light">
+            Wit, warmth,
+          </em>
           <br />
-          <em className="text-gradient-warm italic font-light">whiplash timing.</em>
+          <em className="inline-block hero-rise hero-rise-4 text-gradient-warm italic font-light">
+            whiplash timing.
+          </em>
         </h1>
-        <p className="mt-8 mx-auto max-w-xl text-inkMuted leading-relaxed">
+        <p className="mt-8 mx-auto max-w-xl text-inkMuted leading-relaxed hero-rise hero-rise-5">
           Three creator tools trained on ten years of podcasts, posts, PUBG streams, stage
           bits, and late-night WhatsApp takes. You bring the idea, we bring the voice that
           built AIB.
         </p>
-        <div className="mt-9 flex items-center justify-center gap-3 flex-wrap">
-          <Link href="/app" className="btn-gradient">Try it free, 20 drafts on us</Link>
-          <a href="#demo" className="btn-ghost">
+        <div className="mt-9 flex items-center justify-center gap-3 flex-wrap hero-rise hero-rise-6">
+          <Link href="/app" className="btn-gradient"><span>Try it free, 20 drafts on us</span></Link>
+          <a href="#demo" className="btn-ghost link-grow">
             <Play size={16} className="fill-current" />
             Watch 90-second demo
           </a>
         </div>
 
         {/* Polaroid */}
-        <div className="mt-14 flex justify-center">
-          <div className="polaroid w-[280px] md:w-[320px]">
+        <Reveal delay={3} className="mt-14 flex justify-center">
+          <TiltCard restingRotation={-2} maxTiltX={5} maxTiltY={5} className="polaroid w-[280px] md:w-[320px]">
             <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-[#3a1a12] via-[#5a1b18] to-[#2c1008] aspect-[3/4] flex items-end">
               <div className="absolute top-3 right-3">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-black/70 px-2.5 py-1 text-[10px] font-semibold text-white">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#4ade80]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#4ade80] animate-pulse" />
                   STREAMING
                 </span>
               </div>
@@ -94,29 +102,34 @@ function Hero() {
                 <span className="text-[10px] text-inkSubtle font-mono">v3.2</span>
               </div>
             </div>
-          </div>
-        </div>
+          </TiltCard>
+        </Reveal>
 
         {/* Archive chips */}
-        <div className="mt-14 text-center">
+        <Reveal className="mt-14 text-center">
           <div className="text-[11px] tracking-[0.28em] text-inkSubtle font-semibold">IN THE ARCHIVE</div>
           <div className="mt-4 flex flex-wrap justify-center gap-5 text-sm text-inkMuted">
             <span className="inline-flex items-center gap-2"><Dot className="bg-salmon/70" />Honestly Podcast</span>
             <span className="inline-flex items-center gap-2"><Dot className="bg-pink/70" />AIB Vault</span>
             <span className="inline-flex items-center gap-2"><Dot className="bg-lavenderDeep/70" />Comicstaan</span>
           </div>
-        </div>
+        </Reveal>
 
-        {/* Timeline */}
-        <div className="mt-8 border-t border-line pt-5">
-          <div className="wrap flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-[13px] text-inkMuted">
-            <TimelineItem label="Honestly, ep 142" year="2024" />
-            <TimelineItem label="AIB, Budget Roast" year="2016" />
-            <TimelineItem label="Comicstaan S1" year="2018" />
-            <TimelineItem label="PUBG late stream" year="2020" />
-            <TimelineItem label="Learning streams" year="2022" />
-          </div>
-        </div>
+        {/* Timeline marquee */}
+        <Reveal delay={1} className="mt-8 border-t border-line pt-5">
+          <Marquee>
+            <div className="flex gap-x-8 items-center text-[13px] text-inkMuted whitespace-nowrap">
+              <TimelineItem label="Honestly, ep 142" year="2024" />
+              <TimelineItem label="AIB, Budget Roast" year="2016" />
+              <TimelineItem label="Comicstaan S1" year="2018" />
+              <TimelineItem label="PUBG late stream" year="2020" />
+              <TimelineItem label="Learning streams" year="2022" />
+              <TimelineItem label="Stonks EP 10" year="2023" />
+              <TimelineItem label="Sadhguru interview" year="2024" />
+              <TimelineItem label="PUBG with MKBHD" year="2022" />
+            </div>
+          </Marquee>
+        </Reveal>
       </div>
     </section>
   );
@@ -137,7 +150,7 @@ function WorkspacePreview() {
   return (
     <section id="demo" className="bg-soft py-14">
       <div className="wrap">
-        <div className="workspace-card p-6 md:p-8 grid md:grid-cols-[220px_1fr] gap-6">
+        <div className="workspace-card p-6 md:p-8 grid md:grid-cols-[220px_1fr] gap-6 reveal">
           <aside className="space-y-2">
             {[
               { dot: "bg-salmon/70", name: "Content Generation", active: true },
@@ -181,10 +194,10 @@ function WorkspacePreview() {
             </div>
             <div className="mt-5 flex items-center justify-between text-sm text-inkMuted">
               <div className="flex gap-5">
-                <button className="hover:text-ink">Regenerate</button>
-                <button className="hover:text-ink">Show sources (4)</button>
+                <button className="hover:text-ink link-grow">Regenerate</button>
+                <button className="hover:text-ink link-grow">Show sources (4)</button>
               </div>
-              <button className="btn-gradient !py-2 !px-5 !text-xs">Copy</button>
+              <button className="btn-gradient !py-2 !px-5 !text-xs"><span>Copy</span></button>
             </div>
           </div>
         </div>
@@ -206,7 +219,7 @@ function AboutTanmay() {
   return (
     <section className="bg-soft py-20">
       <div className="wrap grid md:grid-cols-2 gap-12 items-center">
-        <div>
+        <Reveal as="div">
           <div className="pill"><Dot className="bg-salmon" />WHO YOU'RE CREATING WITH</div>
           <h2 className="font-serif text-4xl md:text-5xl tracking-tight mt-4 leading-[1.08]">
             Ten years of takes. <em className="text-gradient-warm italic font-light">One very specific laugh.</em>
@@ -224,22 +237,28 @@ function AboutTanmay() {
             </p>
           </div>
           <dl className="mt-10 grid grid-cols-3 gap-8 max-w-lg">
-            {[
-              { value: "10+", label: "YEARS ON MIC" },
-              { value: "4,200", label: "ARCHIVE MOMENTS" },
-              { value: "142", label: "HONESTLY EPISODES" },
-            ].map((s) => (
-              <div key={s.label}>
-                <dd className="font-serif text-4xl text-pinkDeep">{s.value}</dd>
-                <dt className="mt-2 text-[11px] tracking-[0.18em] text-inkSubtle font-semibold">
-                  {s.label}
-                </dt>
-              </div>
-            ))}
+            <Reveal as="div" delay={1}>
+              <dd className="font-serif text-4xl text-pinkDeep stat-num">
+                <CountUp target={10} suffix="+" />
+              </dd>
+              <dt className="mt-2 text-[11px] tracking-[0.18em] text-inkSubtle font-semibold">YEARS ON MIC</dt>
+            </Reveal>
+            <Reveal as="div" delay={2}>
+              <dd className="font-serif text-4xl text-pinkDeep stat-num">
+                <CountUp target={4200} />
+              </dd>
+              <dt className="mt-2 text-[11px] tracking-[0.18em] text-inkSubtle font-semibold">ARCHIVE MOMENTS</dt>
+            </Reveal>
+            <Reveal as="div" delay={3}>
+              <dd className="font-serif text-4xl text-pinkDeep stat-num">
+                <CountUp target={142} />
+              </dd>
+              <dt className="mt-2 text-[11px] tracking-[0.18em] text-inkSubtle font-semibold">HONESTLY EPISODES</dt>
+            </Reveal>
           </dl>
-        </div>
-        <div className="flex justify-center">
-          <div className="polaroid w-[300px] md:w-[340px]" style={{ transform: "rotate(2deg)" }}>
+        </Reveal>
+        <Reveal className="flex justify-center" delay={2}>
+          <TiltCard restingRotation={2} maxTiltX={6} maxTiltY={6} className="polaroid w-[300px] md:w-[340px]">
             <div className="relative overflow-hidden rounded-lg aspect-[4/5] bg-gradient-to-br from-[#d04a2a] via-[#a63920] to-[#3d1408] flex items-end">
               <div className="absolute top-3 right-3 flex items-center gap-1 text-white/90 text-[10px] font-mono">
                 <span>LA50</span><span>·</span><span>Lifestyle Asia</span><span>·</span><span>202</span>
@@ -263,8 +282,8 @@ function AboutTanmay() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          </TiltCard>
+        </Reveal>
       </div>
     </section>
   );
@@ -301,27 +320,27 @@ function Toolkit() {
   return (
     <section className="bg-hero py-20">
       <div className="wrap text-center">
-        <div className="pill mx-auto">THE TOOLKIT</div>
-        <h2 className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
+        <Reveal><div className="pill mx-auto">THE TOOLKIT</div></Reveal>
+        <Reveal delay={1} as="h2" className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
           Three tools. <em className="text-inkSubtle italic font-light">One brain with good timing.</em>
-        </h2>
-        <p className="mt-5 text-inkMuted max-w-xl mx-auto">
+        </Reveal>
+        <Reveal delay={2} as="p" className="mt-5 text-inkMuted max-w-xl mx-auto">
           Each tool reads ten years of Tanmay before it writes a single line. You stay in
           the driver's seat, the voice stays unmistakably his.
-        </p>
+        </Reveal>
         <div className="mt-10 space-y-4 max-w-3xl mx-auto">
-          {tools.map((t) => (
-            <Link key={t.tag} href={t.href} className="card flex items-start gap-4 p-6 text-left group hover:shadow-softLg transition">
+          {tools.map((t, i) => (
+            <Reveal key={t.tag} delay={((i + 1) as 1 | 2 | 3)}><Link href={t.href} className="card flex items-start gap-4 p-6 text-left group hover:shadow-softLg transition">
               <div className={`h-10 w-10 rounded-xl grid place-items-center ${t.iconBg}`}>{t.icon}</div>
               <div className="flex-1">
                 <div className="text-[11px] tracking-[0.2em] font-semibold text-inkSubtle">{t.tag}</div>
                 <div className="mt-1 font-semibold text-lg">{t.name}</div>
                 <div className="mt-1 text-inkMuted text-sm">{t.desc}</div>
                 <div className="mt-4 inline-flex items-center gap-1 text-sm text-ink group-hover:text-pinkDeep transition">
-                  Learn more<ChevronRight size={14} />
+                  <span className="link-grow">Learn more</span><ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
-            </Link>
+            </Link></Reveal>
           ))}
         </div>
       </div>
@@ -339,21 +358,21 @@ function HowItWorks() {
   return (
     <section className="bg-hero py-20">
       <div className="wrap text-center">
-        <div className="pill mx-auto">HOW IT WORKS</div>
-        <h2 className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
+        <Reveal><div className="pill mx-auto">HOW IT WORKS</div></Reveal>
+        <Reveal delay={1} as="h2" className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
           From blank page to <em className="text-inkSubtle italic font-light">banger,</em> in three steps.
-        </h2>
-        <p className="mt-5 text-inkMuted max-w-xl mx-auto">
+        </Reveal>
+        <Reveal delay={2} as="p" className="mt-5 text-inkMuted max-w-xl mx-auto">
           The archive does the reading. The model does the scaffolding. You do the last 5%, which is, famously, the whole point.
-        </p>
+        </Reveal>
         <div className="mt-12 space-y-5 max-w-3xl mx-auto">
-          {steps.map((s) => (
-            <div key={s.n} className="card-soft p-6 text-left">
+          {steps.map((s, i) => (
+            <Reveal key={s.n} delay={((i + 1) as 1 | 2 | 3)} className="card-soft p-6 text-left">
               <div className="font-serif text-5xl text-peachDeep">{s.n}</div>
               <hr className="mt-3 border-line" />
               <div className="mt-4 font-semibold">{s.title}</div>
               <div className="mt-1 text-inkMuted text-sm">{s.body}</div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -374,22 +393,22 @@ function Features() {
   return (
     <section className="bg-hero py-20">
       <div className="wrap text-center">
-        <div className="pill mx-auto">FEATURES</div>
-        <h2 className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
+        <Reveal><div className="pill mx-auto">FEATURES</div></Reveal>
+        <Reveal delay={1} as="h2" className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
           Soft defaults. <em className="text-inkSubtle italic font-light">Serious knobs.</em>
-        </h2>
-        <p className="mt-5 text-inkMuted max-w-xl mx-auto">
+        </Reveal>
+        <Reveal delay={2} as="p" className="mt-5 text-inkMuted max-w-xl mx-auto">
           Everything a working creator needs on a Tuesday deadline. Nothing that gets in the way at 2 AM.
-        </p>
+        </Reveal>
         <div className="mt-10 space-y-3 max-w-3xl mx-auto">
-          {features.map((f) => (
-            <div key={f.title} className="card-soft p-5 flex items-start gap-4 text-left">
+          {features.map((f, i) => (
+            <Reveal key={f.title} delay={((Math.min(i + 1, 6)) as 1 | 2 | 3 | 4 | 5 | 6)} className="card-soft p-5 flex items-start gap-4 text-left">
               <div className={`h-9 w-9 rounded-xl grid place-items-center shrink-0 ${f.bg}`}>{f.icon}</div>
               <div>
                 <div className="font-semibold">{f.title}</div>
                 <div className="mt-1 text-sm text-inkMuted">{f.body}</div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -402,7 +421,7 @@ function Testimonial() {
   return (
     <section className="bg-hero py-16">
       <div className="wrap">
-        <div className="card max-w-3xl mx-auto p-8 md:p-10">
+        <Reveal className="card max-w-3xl mx-auto p-8 md:p-10">
           <Quote size={22} className="text-salmon" />
           <p className="font-serif text-2xl md:text-[28px] leading-[1.35] mt-4">
             I drafted two reels, an ad read, and a newsletter in the time it usually takes
@@ -416,7 +435,7 @@ function Testimonial() {
               <div className="text-xs text-inkSubtle">Creator, podcaster, reluctant beta tester</div>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -432,16 +451,16 @@ function Pricing() {
   return (
     <section className="bg-hero py-20">
       <div className="wrap text-center">
-        <div className="pill mx-auto">PRICING</div>
-        <h2 className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
+        <Reveal><div className="pill mx-auto">PRICING</div></Reveal>
+        <Reveal delay={1} as="h2" className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
           Honest plans, <em className="text-inkSubtle italic font-light">priced in rupees.</em>
-        </h2>
-        <p className="mt-5 text-inkMuted max-w-xl mx-auto">
+        </Reveal>
+        <Reveal delay={2} as="p" className="mt-5 text-inkMuted max-w-xl mx-auto">
           Start free. Upgrade the week you realise you're shipping twice as much and thinking half as hard.
-        </p>
+        </Reveal>
         <div className="mt-10 space-y-5 max-w-3xl mx-auto">
-          {plans.map((p) => (
-            <div key={p.badge} className="card text-left p-7 md:p-8">
+          {plans.map((p, i) => (
+            <Reveal key={p.badge} delay={((i + 1) as 1 | 2 | 3)} className="card text-left p-7 md:p-8">
               <div className="flex items-center gap-3">
                 <div className="text-[11px] tracking-[0.2em] font-semibold text-inkSubtle">{p.badge}</div>
                 {p.tag && <span className="rounded-full bg-lavender/40 text-ink px-3 py-0.5 text-[11px] font-semibold">{p.tag}</span>}
@@ -463,12 +482,12 @@ function Pricing() {
               </ul>
               <div className="mt-7">
                 {p.variant === "gradient" ? (
-                  <Link href="/app" className="btn-gradient w-full">{p.cta}</Link>
+                  <Link href="/app" className="btn-gradient w-full"><span>{p.cta}</span></Link>
                 ) : (
-                  <Link href="/app" className="w-full inline-flex items-center justify-center rounded-full border border-line bg-white py-3 px-5 text-sm font-medium hover:bg-canvas">{p.cta}</Link>
+                  <Link href="/app" className="w-full inline-flex items-center justify-center rounded-full border border-line bg-white py-3 px-5 text-sm font-medium hover:bg-canvas transition">{p.cta}</Link>
                 )}
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -481,16 +500,18 @@ function CtaBanner() {
   return (
     <section className="bg-hero py-16">
       <div className="wrap">
-        <div className="rounded-[28px] border border-white/50 p-12 md:p-16 text-center shadow-softLg" style={{ background: "linear-gradient(135deg, #FFE9D9 0%, #FCE5F0 50%, #E4D9F4 100%)" }}>
-          <span className="pill bg-white/70 border-white/70">READY WHEN YOU ARE</span>
-          <h2 className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
-            Ready when you are, <em className="italic">boss.</em>
-          </h2>
-          <p className="mt-5 max-w-md mx-auto text-inkMuted">
-            Spin up your first draft in under a minute. No credit card, no wait-list, no seven-step onboarding tour.
-          </p>
-          <Link href="/app" className="btn-gradient mt-8 inline-flex">Try it free</Link>
-        </div>
+        <Reveal>
+          <div className="rounded-[28px] border border-white/50 p-12 md:p-16 text-center shadow-softLg" style={{ background: "linear-gradient(135deg, #FFE9D9 0%, #FCE5F0 50%, #E4D9F4 100%)" }}>
+            <span className="pill bg-white/70 border-white/70">READY WHEN YOU ARE</span>
+            <h2 className="font-serif text-4xl md:text-5xl tracking-tight mt-4">
+              Ready when you are, <em className="italic">boss.</em>
+            </h2>
+            <p className="mt-5 max-w-md mx-auto text-inkMuted">
+              Spin up your first draft in under a minute. No credit card, no wait-list, no seven-step onboarding tour.
+            </p>
+            <Link href="/app" className="btn-gradient mt-8 inline-flex"><span>Try it free</span></Link>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -511,7 +532,7 @@ function Footer() {
           </p>
           <div className="mt-5 flex gap-2.5 text-inkMuted">
             {[Twitter, Instagram, Youtube, Linkedin].map((Icon, i) => (
-              <a key={i} href="#" className="h-8 w-8 rounded-lg border border-line bg-white grid place-items-center hover:text-ink transition">
+              <a key={i} href="#" className="h-8 w-8 rounded-lg border border-line bg-white grid place-items-center hover:text-ink hover:scale-110 hover:border-pinkDeep transition-all">
                 <Icon size={14} />
               </a>
             ))}

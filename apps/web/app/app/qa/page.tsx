@@ -5,6 +5,7 @@ import { AlertCircle, CheckCircle2, Loader2, Shield, Sparkles, XCircle } from "l
 import { qa } from "@/lib/api";
 import type { QaResponse, VerifiedClaim } from "@/lib/types";
 import CitationCard from "@/components/workspace/CitationCard";
+import Reveal from "@/components/motion/Reveal";
 
 export default function QaTab() {
   const [question, setQuestion] = useState("");
@@ -64,7 +65,7 @@ export default function QaTab() {
         </div>
       )}
 
-      {out && <QaResult result={out} />}
+      {out && <Reveal key={(out.answer ?? out.reason ?? "").slice(0, 32)}><QaResult result={out} /></Reveal>}
     </div>
   );
 }

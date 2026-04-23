@@ -9,16 +9,19 @@
     },
     {
       "name": "FastAPI backend (uvicorn)",
-      "runtimeExecutable": "python3",
+      "runtimeExecutable": "/usr/bin/env",
       "runtimeArgs": [
+        "PYTHONPATH=/Users/amlannttripathy/Downloads/Tanmaygpt/apps/api",
+        "python3",
         "-m",
         "uvicorn",
         "app.main:app",
-        "--app-dir",
-        "/Users/amlannttripathy/Downloads/Tanmaygpt/apps/api",
         "--port",
         "8000",
-        "--reload"
+        "--loop",
+        "asyncio",
+        "--http",
+        "h11"
       ],
       "port": 8000
     },

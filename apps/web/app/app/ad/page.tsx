@@ -9,6 +9,7 @@ import type {
   AdValidation,
 } from "@/lib/types";
 import CitationCard from "@/components/workspace/CitationCard";
+import Reveal from "@/components/motion/Reveal";
 
 const DEFAULT_REQ: AdGenerateRequest = {
   product_name: "",
@@ -155,17 +156,17 @@ export default function AdTab() {
       )}
 
       {out && (
-        <div className="space-y-5">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div key={out.data.title.slice(0, 32)} className="space-y-5">
+          <Reveal className="flex items-center gap-2 flex-wrap">
             <ValidationBadge validation={out.validation} />
             {out.data.brand_safety_flags.map((f) => (
               <span key={f} className="pill border-amber-200 bg-amber-50 text-[#a26a1a]">
                 <AlertTriangle size={10} className="text-[#a26a1a]" />{f}
               </span>
             ))}
-          </div>
+          </Reveal>
 
-          <div>
+          <Reveal delay={1}>
             <div className="flex items-baseline justify-between">
               <h3 className="font-serif text-2xl">{out.data.title}</h3>
               <span className="font-mono text-[11px] text-inkSubtle">
@@ -178,11 +179,11 @@ export default function AdTab() {
                 "{out.data.hook}"
               </div>
             )}
-          </div>
+          </Reveal>
 
           <div className="space-y-3">
-            {out.data.scenes.map((s) => (
-              <div key={s.scene_number} className="rounded-2xl border border-line bg-white p-5">
+            {out.data.scenes.map((s, i) => (
+              <Reveal key={s.scene_number} delay={((Math.min(i + 1, 6)) as 1 | 2 | 3 | 4 | 5 | 6)} className="rounded-2xl border border-line bg-white p-5">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-mono text-[11px] text-inkSubtle">SCENE {s.scene_number}</span>
                   <span className="font-mono text-[11px] text-inkSubtle">{s.duration_seconds}s</span>
@@ -199,13 +200,13 @@ export default function AdTab() {
                   </div>
                 )}
                 <div className="mt-3 space-y-2">
-                  {s.lines.map((line, i) => (
-                    <blockquote key={i} className="border-l-2 border-pinkDeep/40 pl-3 text-[15px] leading-relaxed">
+                  {s.lines.map((line, lineIdx) => (
+                    <blockquote key={lineIdx} className="border-l-2 border-pinkDeep/40 pl-3 text-[15px] leading-relaxed">
                       {line}
                     </blockquote>
                   ))}
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
 

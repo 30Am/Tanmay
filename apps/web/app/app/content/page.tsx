@@ -10,6 +10,7 @@ import type {
 } from "@/lib/types";
 import ToneDial from "@/components/workspace/ToneDial";
 import CitationCard from "@/components/workspace/CitationCard";
+import Reveal from "@/components/motion/Reveal";
 
 type Format = ContentGenerateRequest["format"];
 const FORMAT_OPTIONS: { value: Format; label: string }[] = [
@@ -117,7 +118,7 @@ export default function ContentTab() {
 
       <div className="flex items-center gap-3">
         <button onClick={run} disabled={disabled} className="btn-gradient">
-          {loading ? (<><Loader2 size={14} className="mr-2 animate-spin" />Generating…</>) : (<><Sparkles size={14} className="mr-2" />Generate draft</>)}
+          <span>{loading ? (<><Loader2 size={14} className="mr-2 animate-spin" />Generating…</>) : (<><Sparkles size={14} className="mr-2" />Generate draft</>)}</span>
         </button>
         {out && (
           <button onClick={copyAll} className="btn-ghost">
@@ -133,12 +134,12 @@ export default function ContentTab() {
       )}
 
       {out && (
-        <div className="space-y-5 pt-2">
-          <Section title="SCRIPT" body={out.script} mono={false} emphasis />
-          {out.description && <Section title="DESCRIPTION" body={out.description} />}
-          {out.rationale && <Section title="RATIONALE" body={out.rationale} />}
+        <div key={out.script.slice(0, 32)} className="space-y-5 pt-2">
+          <Reveal><Section title="SCRIPT" body={out.script} mono={false} emphasis /></Reveal>
+          {out.description && <Reveal delay={1}><Section title="DESCRIPTION" body={out.description} /></Reveal>}
+          {out.rationale && <Reveal delay={2}><Section title="RATIONALE" body={out.rationale} /></Reveal>}
           {out.citations.length > 0 && (
-            <div>
+            <Reveal delay={3}>
               <div className="text-[11px] tracking-[0.18em] font-semibold text-inkSubtle mb-2">
                 CITATIONS ({out.citations.length})
               </div>
@@ -147,7 +148,7 @@ export default function ContentTab() {
                   <CitationCard key={c.source_id + i} idx={i + 1} c={c} />
                 ))}
               </div>
-            </div>
+            </Reveal>
           )}
         </div>
       )}
