@@ -26,8 +26,10 @@ data/raw/
 data/logs/
 *.log
 
-# Qdrant (local binary + storage)
+# Qdrant (local binary + storage — any location)
 infra/qdrant/
+storage/
+.qdrant-initialized
 
 # Debug artifacts
 data/*.raw.txt
@@ -38,3 +40,4 @@ data/*.raw.txt
 # IDE
 .idea/
 .vscode/
+node_modules

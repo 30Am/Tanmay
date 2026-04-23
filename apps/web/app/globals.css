@@ -3,24 +3,233 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
-  background: #0f1115;
-  color: #e8ecf2;
+  background: #fdfbf8;
+  color: #1a1a1f;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-  font-family: Inter, system-ui, -apple-system, sans-serif;
+/* Hero multi-blob gradient (drifts subtly via animation) */
+.bg-hero {
+  background-image: radial-gradient(70% 55% at 12% 20%, #ffe1cc 0%, transparent 55%),
+    radial-gradient(55% 45% at 85% 10%, #fce5f0 0%, transparent 60%),
+    radial-gradient(75% 70% at 70% 85%, #e0d5f2 0%, transparent 70%),
+    radial-gradient(70% 60% at 15% 90%, #d6ecdf 0%, transparent 70%), #fdfbf8;
 }
 
-.scroll-thin::-webkit-scrollbar {
+.bg-soft {
+  background: linear-gradient(180deg, #fdfbf8 0%, #fdfbf8 70%, #faf4ec 100%);
+}
+
+/* Shared section container */
+.wrap {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Pullquote italic text with a warm gradient fill */
+.text-gradient-warm {
+  background: linear-gradient(90deg, #ff8a6a 0%, #ff9ebe 50%, #c2a5e8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Polaroid photo frame */
+.polaroid {
+  position: relative;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px rgba(30, 22, 16, 0.08), 0 24px 50px rgba(30, 22, 16, 0.12);
+  transform: rotate(-2deg);
+  background: #fff;
+  padding: 10px 10px 14px 10px;
+}
+.polaroid::before,
+.polaroid::after {
+  content: "";
+  position: absolute;
+  width: 64px;
+  height: 18px;
+  background: rgba(255, 240, 210, 0.9);
+  border: 1px solid rgba(30, 22, 16, 0.06);
+  box-shadow: 0 1px 3px rgba(30, 22, 16, 0.08);
+}
+.polaroid::before {
+  top: -9px;
+  left: 16px;
+  transform: rotate(-6deg);
+}
+.polaroid::after {
+  bottom: -9px;
+  right: 16px;
+  transform: rotate(4deg);
+}
+
+/* Yellow asterisk sticky note — right-edge tab seen in every PDF page */
+.asterisk-note {
+  position: fixed;
+  right: 8px;
+  top: 35%;
+  width: 32px;
+  height: 32px;
+  background: #111;
+  color: #facc15;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  box-shadow: 0 6px 18px rgba(17, 17, 17, 0.2);
+  z-index: 40;
+}
+
+/* Reusable card surfaces */
+.card {
+  background: #ffffff;
+  border: 1px solid #ece8e0;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(30, 22, 16, 0.04), 0 8px 24px rgba(30, 22, 16, 0.06);
+}
+.card-soft {
+  background: linear-gradient(180deg, #ffffff 0%, #fffaf3 100%);
+  border: 1px solid #ece8e0;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(30, 22, 16, 0.04);
+}
+
+/* Pill with colored dot */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5a5a66;
+  background: #ffffff;
+  border: 1px solid #ece8e0;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+}
+.pill-dot {
   width: 6px;
   height: 6px;
+  border-radius: 9999px;
+  background: #1a1a1f;
 }
-.scroll-thin::-webkit-scrollbar-thumb {
-  background: #2a2f3d;
-  border-radius: 3px;
+
+/* Gradient CTA */
+.btn-gradient {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  color: #1a1a1f;
+  background: linear-gradient(90deg, #ffb08a 0%, #ff9ebe 55%, #c2a5e8 100%);
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 2px rgba(30, 22, 16, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.btn-gradient:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(255, 158, 190, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.btn-gradient:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Ghost secondary button */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  font-weight: 500;
+  color: #1a1a1f;
+  background: transparent;
+  border-radius: 9999px;
+  transition: background 120ms ease;
+}
+.btn-ghost:hover {
+  background: rgba(26, 26, 31, 0.05);
+}
+
+/* Form surface for the workspace */
+.workspace-card {
+  background: #ffffff;
+  border: 1px solid #ece8e0;
+  border-radius: 24px;
+  box-shadow: 0 2px 6px rgba(30, 22, 16, 0.05), 0 20px 60px rgba(30, 22, 16, 0.06);
+}
+
+/* Input defaults — minimal, soft */
+.input,
+.textarea,
+.select {
+  width: 100%;
+  background: #fdfbf7;
+  border: 1px solid #ece8e0;
+  border-radius: 14px;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #1a1a1f;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.input:focus,
+.textarea:focus,
+.select:focus {
+  outline: none;
+  border-color: #ff9ebe;
+  box-shadow: 0 0 0 4px rgba(255, 158, 190, 0.15);
+}
+
+.textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #5a5a66;
+  margin-bottom: 0.4rem;
+}
+
+/* Subtle caret loading animation for streaming pretend */
+.typing-caret::after {
+  content: "▍";
+  display: inline-block;
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+  color: #ff9ebe;
+}
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* Scrollbar restraint */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(26, 26, 31, 0.12);
+  border-radius: 999px;
 }

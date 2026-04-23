@@ -1,42 +1,33 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Create with Tanmay",
-  description: "Three creator tools, one persona core.",
+  description:
+    "Three creator tools trained on ten years of podcasts, posts, PUBG streams, stage bits, and late-night WhatsApp takes. You bring the idea, we bring the voice that built AIB.",
 };
-
-const tabs = [
-  { href: "/content", label: "Content" },
-  { href: "/ad", label: "Ad" },
-  { href: "/qa", label: "Q&A" },
-];
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen">
-        <div className="mx-auto max-w-6xl px-6 py-8">
-          <header className="flex items-center justify-between border-b border-border pb-6">
-            <Link href="/" className="flex items-center gap-3">
-              <span className="font-mono text-xs uppercase tracking-[0.3em] text-accent">Create with</span>
-              <span className="text-2xl font-bold tracking-tight">Tanmay</span>
-            </Link>
-            <nav className="flex gap-1 rounded-full border border-border bg-panel p-1">
-              {tabs.map((t) => (
-                <Link
-                  key={t.href}
-                  href={t.href}
-                  className="rounded-full px-4 py-1.5 text-sm text-muted transition hover:text-white"
-                >
-                  {t.label}
-                </Link>
-              ))}
-            </nav>
-          </header>
-          <main className="py-10">{children}</main>
-        </div>
+    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+      <body className="font-sans antialiased">
+        <div className="asterisk-note select-none">✻</div>
+        {children}
       </body>
     </html>
   );

@@ -23,6 +23,7 @@ export interface ToneDial {
   hinglish_ratio: number;
 }
 
+/* ---- Tab 1: Content ---- */
 export interface ContentGenerateRequest {
   idea: string;
   format: "long_podcast" | "reel" | "thread" | "stage";
@@ -30,6 +31,14 @@ export interface ContentGenerateRequest {
   tone: ToneDial;
 }
 
+export interface ContentGenerateResponse {
+  script: string;
+  description: string;
+  rationale: string;
+  citations: Citation[];
+}
+
+/* ---- Tab 2: Ad ---- */
 export interface AdCast {
   name: string;
   role?: string;
@@ -65,7 +74,21 @@ export interface AdGenerateResponse {
   citations: Citation[];
 }
 
+export interface AdValidation {
+  valid: boolean;
+  duration_seconds: number;
+  words: number;
+  issues: string[];
+}
+
+/* ---- Tab 3: Q&A ---- */
 export type QaStatus = "answered" | "refused_low_confidence" | "refused_sensitive";
+
+export interface VerifiedClaim {
+  claim: string;
+  citation_indices: number[];
+  supported: boolean;
+}
 
 export interface QaResponse {
   status: QaStatus;
@@ -73,4 +96,8 @@ export interface QaResponse {
   reason?: string | null;
   citations: Citation[];
   max_similarity?: number | null;
+  verified_claims: VerifiedClaim[];
+  n_supported: number;
+  n_unsupported: number;
+  paraphrases_used: string[];
 }

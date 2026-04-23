@@ -318,6 +318,73 @@ Phase 07 this session: ~$0.35 (Sonnet generation + Haiku paraphrase + Haiku veri
 
 ---
 
+# Phase 08 — Frontend
+
+Next.js 14 app at [apps/web](apps/web) — landing page + functional workspace at `/app` wired to all three backend endpoints. Pixel-aimed at the design PDF (warm peach/pink/lavender gradient, Fraunces display italics, rounded-2xl cards, polaroid photo frames).
+
+### Routes
+
+| Path | What it is |
+| --- | --- |
+| `/` | Marketing landing — 11 sections: hero, workspace preview, about Tanmay, toolkit, how-it-works, features, testimonial, pricing, CTA, footer |
+| `/app` | Tool picker tile |
+| `/app/content` | Content tab — idea + format + length + tone dial → script / description / rationale / citations |
+| `/app/ad` | Ad tab — structured brief → schema-validated ad with validation badge, MD / Fountain / JSON exports, brand-safety refusal UI |
+| `/app/qa` | Q&A tab — question → answered / refused_low_confidence / refused_sensitive, with per-claim verification badges + paraphrases-used disclosure |
+
+### Key components
+
+- [apps/web/app/layout.tsx](apps/web/app/layout.tsx) — root layout, Fraunces + Inter via next/font
+- [apps/web/app/page.tsx](apps/web/app/page.tsx) — landing (single-file for readability)
+- [apps/web/app/app/layout.tsx](apps/web/app/app/layout.tsx) — workspace shell with nav + sticky header
+- [apps/web/components/workspace/WorkspaceNav.tsx](apps/web/components/workspace/WorkspaceNav.tsx) — tool sidebar with active-state highlighting
+- [apps/web/components/workspace/ToneDial.tsx](apps/web/components/workspace/ToneDial.tsx) — 4-dimensional tone slider (roast / chaos / depth / hinglish)
+- [apps/web/components/workspace/CitationCard.tsx](apps/web/components/workspace/CitationCard.tsx) — YouTube timestamped deep-link card
+
+### API client
+
+[apps/web/lib/api.ts](apps/web/lib/api.ts) — typed fetch wrappers for `/generate/content`, `/generate/ad` (reads `X-Ad-*` validation headers), `/generate/ad?format=md|fountain` (blob download), and `/generate/qa`. All three tools use plain JSON POST (no SSE yet).
+
+### Design system
+
+- Palette in [tailwind.config.ts](apps/web/tailwind.config.ts): warm canvas + pink/lavender/salmon/mint/peach tokens
+- Component utilities in [globals.css](apps/web/app/globals.css): `.btn-gradient`, `.pill`, `.card`, `.card-soft`, `.workspace-card`, `.polaroid`, `.text-gradient-warm`, `.bg-hero`
+- Fonts: Fraunces (display + italic pullquotes), Inter (body)
+
+### Build result
+
+```
+Route (app)            Size     First Load JS
+┌ ○ /                  177 B    94.1 kB
+├ ○ /_not-found        873 B    88 kB
+├ ○ /app               177 B    94.1 kB
+├ ○ /app/ad            4.73 kB  91.8 kB
+├ ○ /app/content       3.85 kB  91 kB
+└ ○ /app/qa            3.87 kB  91 kB
+```
+
+All pages prerender statically. 0 type errors.
+
+### Dev server configs
+
+[.claude/launch.json](.claude/launch.json) encodes all three local servers:
+
+1. Qdrant (`./infra/qdrant/qdrant` → :6333)
+2. FastAPI uvicorn (`python3 -m uvicorn app.main:app --reload` → :8000)
+3. Next.js (`npm run dev` → :3000)
+
+### Not shipped yet (stretch)
+
+- SSE streaming in `/app/content` — backend doesn't stream, blocking JSON only
+- Voice-clone preview
+- Timeline explorer
+- Chrome extension
+- Clerk auth + pricing payment flows
+- Real photo of Tanmay (placeholder SVG used)
+- History sidebar
+
+---
+
 ## Overpowered — Tanmay appearances
 
 14 / 33 videos mention Tanmay in title/description/tags.
