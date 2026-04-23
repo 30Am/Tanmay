@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "@/components/ui/Logo";
+import UserMenu from "@/components/workspace/UserMenu";
 import { cn } from "@/lib/utils";
 
 const CREATE = [
@@ -49,13 +50,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-auto p-5">
-        <div className="card-flat flex items-center gap-3 p-3">
-          <span className="h-10 w-10 rounded-full bg-gradient-sunrise shrink-0" />
-          <div className="min-w-0">
-            <div className="text-[14px] font-semibold text-ink leading-tight">Amlan</div>
-            <div className="text-[12px] text-ink-3 mt-0.5">Studio · Pro</div>
-          </div>
-        </div>
+        <UserMenu />
       </div>
     </aside>
   );
