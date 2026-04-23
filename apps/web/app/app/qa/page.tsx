@@ -5,7 +5,7 @@ import { AlertCircle, CheckCircle2, Loader2, Shield, Sparkles, XCircle } from "l
 import { qa } from "@/lib/api";
 import type { QaResponse, VerifiedClaim } from "@/lib/types";
 import CitationCard from "@/components/workspace/CitationCard";
-import Reveal from "@/components/motion/Reveal";
+import ToolHeader from "@/components/workspace/ToolHeader";
 
 export default function QaTab() {
   const [question, setQuestion] = useState("");
@@ -14,147 +14,117 @@ export default function QaTab() {
   const [out, setOut] = useState<QaResponse | null>(null);
 
   async function run() {
-    setLoading(true);
-    setErr(null);
-    setOut(null);
-    try {
-      const res = await qa(question);
-      setOut(res);
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true); setErr(null); setOut(null);
+    try { setOut(await qa(question)); }
+    catch (e) { setErr(e instanceof Error ? e.message : String(e)); }
+    finally { setLoading(false); }
   }
 
   const disabled = loading || question.trim().length < 3;
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
-      <header className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h2 className="font-serif text-2xl">How Would Tanmay Answer</h2>
-          <p className="text-sm text-inkMuted">
-            Grounded answers from the archive. Refuses honestly when he hasn't spoken on it.
-          </p>
-        </div>
-        <span className="pill"><span className="pill-dot bg-lavenderDeep" />TOOL 03</span>
-      </header>
+    <div className="max-w-[900px]">
+      <ToolHeader
+        eyebrow="TAB 03"
+        title="How Would Tanmay Answer"
+        subtitle="Grounded in his actual words. Refuses honestly when he hasn't spoken on it."
+        chipClass="chip-qa"
+      />
 
-      <div>
-        <label className="label">Your question</label>
-        <textarea
-          className="textarea"
-          placeholder="e.g. what does Tanmay think about therapy and friendships"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && !disabled) run();
-          }}
-        />
-        <div className="mt-1.5 text-[11px] text-inkSubtle">⌘/Ctrl + Enter to submit</div>
+      <div className="card p-8 space-y-5">
+        <div>
+          <label className="field-label">Your question</label>
+          <textarea
+            className="textarea-field"
+            placeholder="e.g. what does Tanmay think about therapy and friendships"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && !disabled) run();
+            }}
+          />
+          <div className="mt-2 text-[12px] text-ink-3">⌘ / Ctrl + Enter to submit</div>
+        </div>
+        <button onClick={run} disabled={disabled} className="btn-primary">
+          {loading
+            ? <><Loader2 size={16} className="mr-2 animate-spin" />Thinking…</>
+            : <><Sparkles size={16} className="mr-2" />Ask</>}
+        </button>
       </div>
 
-      <button onClick={run} disabled={disabled} className="btn-gradient">
-        {loading ? (<><Loader2 size={14} className="mr-2 animate-spin" />Thinking…</>) : (<><Sparkles size={14} className="mr-2" />Ask</>)}
-      </button>
-
       {err && (
-        <div className="rounded-xl border border-refuseRose bg-refuseRose/30 p-4 text-sm">
+        <div className="mt-6 rounded-2xl bg-coral/15 border border-coral/40 p-5 text-body text-ink">
           <strong>Error:</strong> {err}
         </div>
       )}
 
-      {out && <Reveal key={(out.answer ?? out.reason ?? "").slice(0, 32)}><QaResult result={out} /></Reveal>}
+      {out && <div className="mt-8"><QaResult r={out} /></div>}
     </div>
   );
 }
 
-function QaResult({ result }: { result: QaResponse }) {
-  if (result.status === "refused_sensitive") {
+function QaResult({ r }: { r: QaResponse }) {
+  if (r.status === "refused_sensitive") {
     return (
-      <div className="rounded-2xl border border-refuseRose bg-refuseRose/20 p-5">
-        <div className="flex items-center gap-2 font-semibold">
-          <Shield size={16} />Refused — sensitive topic
-        </div>
-        <div className="mt-2 text-sm text-inkMuted">{result.reason}</div>
+      <div className="card-flat bg-coral/10 border-coral/40 p-6">
+        <div className="flex items-center gap-2 font-semibold text-ink"><Shield size={17} />Refused — sensitive topic</div>
+        <p className="mt-2 text-body text-ink-2">{r.reason}</p>
       </div>
     );
   }
-  if (result.status === "refused_low_confidence") {
+  if (r.status === "refused_low_confidence") {
     return (
-      <div className="rounded-2xl border border-line bg-cream/60 p-5">
-        <div className="flex items-center gap-2 font-semibold">
-          <AlertCircle size={16} />Tanmay hasn't spoken on this
-        </div>
-        <div className="mt-2 text-sm text-inkMuted">{result.reason}</div>
-        {result.max_similarity != null && (
-          <div className="mt-1 text-[11px] text-inkSubtle font-mono">
-            max similarity {result.max_similarity.toFixed(3)}
-          </div>
-        )}
-        {result.paraphrases_used.length > 0 && (
-          <details className="mt-3 text-[11px] text-inkSubtle">
-            <summary className="cursor-pointer">paraphrases tried</summary>
-            <ul className="mt-1 list-disc pl-4 space-y-1">
-              {result.paraphrases_used.map((p, i) => (<li key={i}>{p}</li>))}
-            </ul>
-          </details>
+      <div className="card-flat bg-butter/60 p-6">
+        <div className="flex items-center gap-2 font-semibold text-ink"><AlertCircle size={17} />Tanmay hasn't spoken on this</div>
+        <p className="mt-2 text-body text-ink-2">{r.reason}</p>
+        {r.max_similarity != null && (
+          <div className="mt-2 text-[12px] text-ink-3 font-mono">max sim {r.max_similarity.toFixed(3)}</div>
         )}
       </div>
     );
   }
 
-  // answered
   return (
-    <div className="space-y-5">
-      <div className="flex items-center gap-3 flex-wrap text-[11px]">
-        <span className="pill bg-[#d4f0de]/40 border-okGreen/40 text-[#1f7a4a]">
-          <CheckCircle2 size={10} />ANSWERED
-        </span>
-        {result.max_similarity != null && (
-          <span className="font-mono text-inkSubtle">sim {result.max_similarity.toFixed(3)}</span>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="chip bg-mint text-ink"><CheckCircle2 size={12} />ANSWERED</span>
+        {r.max_similarity != null && (
+          <span className="font-mono text-[12px] text-ink-3">sim {r.max_similarity.toFixed(3)}</span>
         )}
-        <span className="font-mono text-inkSubtle">
-          {result.n_supported}/{result.n_supported + result.n_unsupported} claims verified
+        <span className="font-mono text-[12px] text-ink-3">
+          {r.n_supported}/{r.n_supported + r.n_unsupported} claims verified
         </span>
       </div>
 
-      <div className="rounded-2xl border border-line bg-white p-6 text-[15px] leading-relaxed whitespace-pre-wrap">
-        {result.answer}
+      <div className="card-flat p-7 text-body-l text-ink leading-relaxed whitespace-pre-wrap">
+        {r.answer}
       </div>
 
-      {result.verified_claims.length > 0 && (
-        <details className="rounded-2xl border border-line bg-canvas/50 p-4">
-          <summary className="cursor-pointer text-[11px] tracking-[0.18em] font-semibold text-inkSubtle">
-            CLAIM-BY-CLAIM VERIFICATION ({result.verified_claims.length})
+      {r.verified_claims.length > 0 && (
+        <details className="card-flat p-5">
+          <summary className="cursor-pointer caption text-coral-deep">
+            CLAIM-BY-CLAIM VERIFICATION · {r.verified_claims.length}
           </summary>
-          <ul className="mt-3 space-y-2">
-            {result.verified_claims.map((c, i) => (
-              <ClaimRow key={i} c={c} />
-            ))}
+          <ul className="mt-4 space-y-2.5">
+            {r.verified_claims.map((c, i) => <ClaimRow key={i} c={c} />)}
           </ul>
         </details>
       )}
 
-      {result.paraphrases_used.length > 0 && (
-        <details className="rounded-xl border border-line bg-canvas/50 p-3 text-[11px] text-inkSubtle">
-          <summary className="cursor-pointer">multi-query paraphrases used</summary>
-          <ul className="mt-2 list-disc pl-4 space-y-1">
-            {result.paraphrases_used.map((p, i) => (<li key={i}>{p}</li>))}
+      {r.paraphrases_used.length > 0 && (
+        <details className="card-flat p-4">
+          <summary className="cursor-pointer text-[13px] text-ink-3">Multi-query paraphrases</summary>
+          <ul className="mt-2 list-disc pl-5 space-y-1 text-[13px] text-ink-2">
+            {r.paraphrases_used.map((p, i) => <li key={i}>{p}</li>)}
           </ul>
         </details>
       )}
 
-      {result.citations.length > 0 && (
+      {r.citations.length > 0 && (
         <div>
-          <div className="text-[11px] tracking-[0.18em] font-semibold text-inkSubtle mb-2">
-            CITATIONS ({result.citations.length})
-          </div>
-          <div className="grid sm:grid-cols-2 gap-2.5">
-            {result.citations.map((c, i) => (
-              <CitationCard key={c.source_id + i} idx={i + 1} c={c} />
-            ))}
+          <div className="caption text-coral-deep mb-3">CITATIONS · {r.citations.length}</div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {r.citations.map((c, i) => <CitationCard key={c.source_id + i} idx={i + 1} c={c} />)}
           </div>
         </div>
       )}
@@ -165,14 +135,14 @@ function QaResult({ result }: { result: QaResponse }) {
 function ClaimRow({ c }: { c: VerifiedClaim }) {
   const Icon = c.supported ? CheckCircle2 : XCircle;
   return (
-    <li className="flex items-start gap-2.5 text-[13px]">
-      <Icon size={14} className={`mt-0.5 shrink-0 ${c.supported ? "text-[#1f9d5a]" : "text-salmon"}`} />
+    <li className="flex items-start gap-3 text-body">
+      <Icon size={16} className={`mt-0.5 shrink-0 ${c.supported ? "text-green-600" : "text-coral-deep"}`} />
       <div className="flex-1">
-        <div className="leading-relaxed">{c.claim}</div>
+        <div className="text-ink">{c.claim}</div>
         {c.citation_indices.length > 0 && (
-          <div className="mt-1 flex gap-1">
+          <div className="mt-1 flex gap-1.5">
             {c.citation_indices.map((idx) => (
-              <span key={idx} className="font-mono text-[10px] rounded-md border border-line bg-white px-1.5 py-0.5 text-inkSubtle">
+              <span key={idx} className="font-mono text-[11px] rounded-md bg-surface border border-border px-2 py-0.5 text-ink-3">
                 [{idx}]
               </span>
             ))}

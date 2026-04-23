@@ -1,25 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Sparkles, Loader2 } from "lucide-react";
+import { Copy, Loader2, Sparkles } from "lucide-react";
 import { generateContent } from "@/lib/api";
-import type {
-  ContentGenerateRequest,
-  ContentGenerateResponse,
-  ToneDial as ToneDialT,
-} from "@/lib/types";
+import type { ContentGenerateRequest, ContentGenerateResponse, ToneDial as ToneDialT } from "@/lib/types";
 import ToneDial from "@/components/workspace/ToneDial";
 import CitationCard from "@/components/workspace/CitationCard";
-import Reveal from "@/components/motion/Reveal";
+import ToolHeader from "@/components/workspace/ToolHeader";
 
 type Format = ContentGenerateRequest["format"];
-const FORMAT_OPTIONS: { value: Format; label: string }[] = [
+const FORMATS: { value: Format; label: string }[] = [
   { value: "reel", label: "Reel / short" },
   { value: "thread", label: "Twitter / X thread" },
   { value: "long_podcast", label: "Podcast cold-open" },
   { value: "stage", label: "Stage bit" },
 ];
-
 const DEFAULT_TONE: ToneDialT = { roast_level: 0.5, chaos: 0.5, depth: 0.5, hinglish_ratio: 0.5 };
 
 export default function ContentTab() {
@@ -32,16 +27,9 @@ export default function ContentTab() {
   const [out, setOut] = useState<ContentGenerateResponse | null>(null);
 
   async function run() {
-    setLoading(true);
-    setErr(null);
-    setOut(null);
+    setLoading(true); setErr(null); setOut(null);
     try {
-      const res = await generateContent({
-        idea,
-        format,
-        target_length_seconds: length,
-        tone,
-      });
+      const res = await generateContent({ idea, format, target_length_seconds: length, tone });
       setOut(res);
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
@@ -50,51 +38,38 @@ export default function ContentTab() {
     }
   }
 
-  function copyAll() {
-    if (!out) return;
-    navigator.clipboard.writeText(
-      `SCRIPT\n\n${out.script}\n\nDESCRIPTION\n\n${out.description}\n\nRATIONALE\n\n${out.rationale}`,
-    );
-  }
-
   const disabled = loading || idea.trim().length < 3;
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
-      <header className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h2 className="font-serif text-2xl">Content Generation</h2>
-          <p className="text-sm text-inkMuted">Drop an idea, get a cited draft in his voice.</p>
-        </div>
-        <span className="pill"><span className="pill-dot bg-salmon" />TOOL 01</span>
-      </header>
+    <div className="max-w-[1100px]">
+      <ToolHeader
+        eyebrow="TAB 01"
+        title="Content Generation"
+        subtitle="Feed an idea, dial the tone, get a Tanmay-voiced draft with citations."
+        chipClass="chip-content"
+      />
 
-      <div className="grid lg:grid-cols-[1fr_280px] gap-5">
-        <div className="space-y-4">
+      <div className="grid lg:grid-cols-[1fr_340px] gap-6">
+        <div className="card p-8 space-y-6">
           <div>
-            <label className="label">Your idea</label>
+            <label className="field-label">Your idea</label>
             <textarea
-              className="textarea"
+              className="textarea-field"
               placeholder="e.g. Why I quit journaling after six years. Dry tone, soft punchline."
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+
+          <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="label">Format</label>
-              <select
-                className="select"
-                value={format}
-                onChange={(e) => setFormat(e.target.value as Format)}
-              >
-                {FORMAT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
+              <label className="field-label">Format</label>
+              <select className="select-field" value={format} onChange={(e) => setFormat(e.target.value as Format)}>
+                {FORMATS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="label">Length (sec): <span className="text-ink font-semibold">{length}</span></label>
+              <label className="field-label">Length: <span className="text-ink font-semibold">{length}s</span></label>
               <input
                 type="range"
                 min={15}
@@ -102,53 +77,56 @@ export default function ContentTab() {
                 step={15}
                 value={length}
                 onChange={(e) => setLength(parseInt(e.target.value))}
-                className="w-full accent-pinkDeep"
+                className="w-full accent-coral-deep mt-3"
               />
-              <div className="flex justify-between text-[10px] text-inkSubtle mt-1">
-                <span>15s</span><span>10m</span>
-              </div>
             </div>
           </div>
-        </div>
-        <div className="rounded-xl border border-line bg-canvas/50 p-4">
-          <div className="text-[11px] tracking-[0.18em] font-semibold text-inkSubtle mb-3">TONE DIAL</div>
-          <ToneDial value={tone} onChange={setTone} />
-        </div>
-      </div>
 
-      <div className="flex items-center gap-3">
-        <button onClick={run} disabled={disabled} className="btn-gradient">
-          <span>{loading ? (<><Loader2 size={14} className="mr-2 animate-spin" />Generating…</>) : (<><Sparkles size={14} className="mr-2" />Generate draft</>)}</span>
-        </button>
-        {out && (
-          <button onClick={copyAll} className="btn-ghost">
-            <Copy size={14} />Copy all
-          </button>
-        )}
+          <div className="flex items-center gap-3 pt-2">
+            <button onClick={run} disabled={disabled} className="btn-primary">
+              {loading
+                ? <><Loader2 size={16} className="mr-2 animate-spin" />Generating…</>
+                : <><Sparkles size={16} className="mr-2" />Generate</>}
+            </button>
+            {out && (
+              <button
+                onClick={() => navigator.clipboard.writeText(`SCRIPT\n\n${out.script}\n\nDESCRIPTION\n\n${out.description}\n\nRATIONALE\n\n${out.rationale}`)}
+                className="btn-ghost"
+              >
+                <Copy size={15} className="mr-2" />Copy all
+              </button>
+            )}
+          </div>
+        </div>
+
+        <aside className="card p-6">
+          <div className="caption text-coral-deep">TONE DIAL</div>
+          <div className="mt-5">
+            <ToneDial value={tone} onChange={setTone} />
+          </div>
+        </aside>
       </div>
 
       {err && (
-        <div className="rounded-xl border border-refuseRose bg-refuseRose/30 p-4 text-sm text-ink">
+        <div className="mt-6 rounded-2xl bg-coral/15 border border-coral/40 p-5 text-body text-ink">
           <strong>Error:</strong> {err}
         </div>
       )}
 
       {out && (
-        <div key={out.script.slice(0, 32)} className="space-y-5 pt-2">
-          <Reveal><Section title="SCRIPT" body={out.script} mono={false} emphasis /></Reveal>
-          {out.description && <Reveal delay={1}><Section title="DESCRIPTION" body={out.description} /></Reveal>}
-          {out.rationale && <Reveal delay={2}><Section title="RATIONALE" body={out.rationale} /></Reveal>}
+        <div className="mt-8 space-y-6">
+          <OutputSection title="SCRIPT" body={out.script} emphasis />
+          {out.description && <OutputSection title="DESCRIPTION" body={out.description} />}
+          {out.rationale && <OutputSection title="RATIONALE" body={out.rationale} />}
           {out.citations.length > 0 && (
-            <Reveal delay={3}>
-              <div className="text-[11px] tracking-[0.18em] font-semibold text-inkSubtle mb-2">
-                CITATIONS ({out.citations.length})
+            <div>
+              <div className="caption text-coral-deep mb-3">
+                CITATIONS · {out.citations.length}
               </div>
-              <div className="grid sm:grid-cols-2 gap-2.5">
-                {out.citations.map((c, i) => (
-                  <CitationCard key={c.source_id + i} idx={i + 1} c={c} />
-                ))}
+              <div className="grid sm:grid-cols-2 gap-3">
+                {out.citations.map((c, i) => <CitationCard key={c.source_id + i} idx={i + 1} c={c} />)}
               </div>
-            </Reveal>
+            </div>
           )}
         </div>
       )}
@@ -156,15 +134,11 @@ export default function ContentTab() {
   );
 }
 
-function Section({ title, body, mono = false, emphasis = false }: { title: string; body: string; mono?: boolean; emphasis?: boolean }) {
+function OutputSection({ title, body, emphasis }: { title: string; body: string; emphasis?: boolean }) {
   return (
     <div>
-      <div className="text-[11px] tracking-[0.18em] font-semibold text-inkSubtle mb-2">{title}</div>
-      <div
-        className={`rounded-2xl border border-line bg-white p-5 whitespace-pre-wrap leading-relaxed ${
-          mono ? "font-mono text-[13px]" : ""
-        } ${emphasis ? "text-[15px]" : "text-[14px] text-inkMuted"}`}
-      >
+      <div className="caption text-coral-deep mb-3">{title}</div>
+      <div className={`card-flat p-6 whitespace-pre-wrap leading-relaxed ${emphasis ? "text-body-l text-ink" : "text-body text-ink-2"}`}>
         {body}
       </div>
     </div>

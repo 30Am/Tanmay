@@ -9,11 +9,10 @@ function timestampedUrl(c: Citation): string {
   return c.url;
 }
 
-function fmtTs(s: number | null | undefined): string {
+function fmt(s: number | null | undefined): string {
   if (s == null) return "";
-  const total = Math.floor(s);
-  const m = Math.floor(total / 60);
-  const ss = total % 60;
+  const m = Math.floor(s / 60);
+  const ss = Math.floor(s % 60);
   return `${m}:${String(ss).padStart(2, "0")}`;
 }
 
@@ -23,27 +22,23 @@ export default function CitationCard({ idx, c }: { idx: number; c: Citation }) {
       href={timestampedUrl(c)}
       target="_blank"
       rel="noreferrer"
-      className="block rounded-xl border border-line bg-canvas/50 hover:bg-white transition p-3.5 group"
+      className="flex items-start gap-3 rounded-2xl bg-surface border border-border p-4 hover:shadow-card transition group"
     >
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 h-6 w-6 rounded-md bg-white border border-line text-[11px] font-mono grid place-items-center text-inkMuted">
-          {idx}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[13px] font-medium truncate max-w-[90%]">
-              {c.title || "(untitled)"}
-            </span>
-            {c.timestamp_seconds != null && (
-              <span className="font-mono text-[10px] text-inkSubtle">@ {fmtTs(c.timestamp_seconds)}</span>
-            )}
-          </div>
-          <div className="mt-1 text-[12px] text-inkMuted line-clamp-2 leading-snug">
-            {c.excerpt}
-          </div>
-        </div>
-        <ExternalLink size={14} className="shrink-0 text-inkSubtle group-hover:text-pinkDeep transition" />
+      <div className="h-7 w-7 rounded-lg bg-bg border border-border grid place-items-center text-[12px] font-mono text-ink-2 shrink-0">
+        {idx}
       </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[14px] font-medium text-ink truncate max-w-[95%]">
+            {c.title || "(untitled)"}
+          </span>
+          {c.timestamp_seconds != null && (
+            <span className="font-mono text-[11px] text-ink-3">@ {fmt(c.timestamp_seconds)}</span>
+          )}
+        </div>
+        <p className="mt-1 text-[13px] text-ink-2 leading-snug line-clamp-2">{c.excerpt}</p>
+      </div>
+      <ExternalLink size={14} className="text-ink-3 group-hover:text-ink transition shrink-0 mt-1" />
     </a>
   );
 }

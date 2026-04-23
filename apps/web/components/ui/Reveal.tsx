@@ -7,22 +7,17 @@ interface Props {
   children: ReactNode;
   as?: ElementType;
   delay?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
-  once?: boolean;
   className?: string;
 }
 
-/**
- * Fades the wrapped element up 14px on first viewport entry. Uses IntersectionObserver
- * so the browser does the work; animation is pure CSS (see `.reveal` in globals.css).
- */
-export default function Reveal({ children, as = "div", delay = 0, once = true, className }: Props) {
+/** Fade-up on first viewport entry. Pure CSS via .reveal / .in-view classes. */
+export default function Reveal({ children, as = "div", delay = 0, className }: Props) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
+    if (!el || typeof IntersectionObserver === "undefined") {
       setVisible(true);
       return;
     }
@@ -31,9 +26,7 @@ export default function Reveal({ children, as = "div", delay = 0, once = true, c
         entries.forEach((e) => {
           if (e.isIntersecting) {
             setVisible(true);
-            if (once) obs.disconnect();
-          } else if (!once) {
-            setVisible(false);
+            obs.disconnect();
           }
         });
       },
@@ -41,18 +34,13 @@ export default function Reveal({ children, as = "div", delay = 0, once = true, c
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [once]);
+  }, []);
 
   return createElement(
     as,
     {
       ref,
-      className: cn(
-        "reveal",
-        visible && "in-view",
-        delay > 0 && `reveal-delay-${delay}`,
-        className,
-      ),
+      className: cn("reveal", visible && "in-view", delay > 0 && `reveal-d${delay}`, className),
     },
     children,
   );

@@ -7,23 +7,21 @@ interface Props {
   onChange: (t: ToneDialT) => void;
 }
 
-const DIMENSIONS: { key: keyof ToneDialT; label: string; low: string; high: string }[] = [
+const DIMS: { key: keyof ToneDialT; label: string; low: string; high: string }[] = [
   { key: "roast_level", label: "Roast", low: "Sincere", high: "Sharp" },
   { key: "chaos", label: "Chaos", low: "Structured", high: "Tangential" },
-  { key: "depth", label: "Depth", low: "Surface", high: "Deep cut" },
-  { key: "hinglish_ratio", label: "Hinglish", low: "English", high: "Bhai bhai" },
+  { key: "depth", label: "Depth", low: "Surface", high: "Deep" },
+  { key: "hinglish_ratio", label: "Hinglish", low: "English", high: "Bhai mode" },
 ];
 
 export default function ToneDial({ value, onChange }: Props) {
   return (
-    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
-      {DIMENSIONS.map((d) => (
+    <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5">
+      {DIMS.map((d) => (
         <div key={d.key}>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-[12px] font-medium text-ink">{d.label}</label>
-            <span className="text-[10px] font-mono text-inkSubtle">
-              {Math.round((value[d.key] as number) * 100)}
-            </span>
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-[13px] font-medium text-ink">{d.label}</label>
+            <span className="text-[12px] font-mono text-ink-3">{Math.round(value[d.key] * 100)}</span>
           </div>
           <input
             type="range"
@@ -32,9 +30,9 @@ export default function ToneDial({ value, onChange }: Props) {
             step={0.05}
             value={value[d.key]}
             onChange={(e) => onChange({ ...value, [d.key]: parseFloat(e.target.value) })}
-            className="w-full accent-pinkDeep"
+            className="w-full accent-coral-deep"
           />
-          <div className="flex items-center justify-between text-[10px] text-inkSubtle mt-1">
+          <div className="flex justify-between text-[11px] text-ink-3 mt-1">
             <span>{d.low}</span>
             <span>{d.high}</span>
           </div>
