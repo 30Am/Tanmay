@@ -1,32 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { AlertTriangle, Copy, Download, Loader2, Shield, Sparkles } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertTriangle, CheckCircle2, Download, Loader2, RotateCcw, Share2, Shield, Sparkles, X } from "lucide-react";
 import { exportAd, generateAd } from "@/lib/api";
 import type { AdGenerateRequest, AdGenerateResponse, AdValidation } from "@/lib/types";
-import CitationCard from "@/components/workspace/CitationCard";
-import ToolHeader from "@/components/workspace/ToolHeader";
+import ToolTopBar from "@/components/workspace/ToolTopBar";
 
-const DEFAULT_REQ: AdGenerateRequest = {
-  product_name: "",
-  product_description: "",
-  target_audience: "",
-  duration_seconds: 30,
-  language: "hinglish",
-  cast: [],
-  celebrities: [],
-  notes: "",
+const WPM: Record<"hinglish" | "english" | "hindi", number> = {
+  hinglish: 138, english: 156, hindi: 120,
 };
+const DURATIONS = [15, 30, 45, 60, 90, 120, 180];
 
 export default function AdsTab() {
-  const [req, setReq] = useState<AdGenerateRequest>(DEFAULT_REQ);
+  const [productName, setProductName] = useState("");
+  const [productDescription, setProductDescription] = useState("");
+  const [targetAudience, setTargetAudience] = useState("");
+  const [duration, setDuration] = useState(45);
+  const [language, setLanguage] = useState<"hinglish" | "english" | "hindi">("hinglish");
+  const [celebs, setCelebs] = useState<string[]>([]);
+  const [celebInput, setCelebInput] = useState("");
+  const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<{ message: string; detail?: unknown } | null>(null);
   const [out, setOut] = useState<{ data: AdGenerateResponse; validation: AdValidation } | null>(null);
   const [exportBusy, setExportBusy] = useState<null | "md" | "fountain">(null);
 
+  const req: AdGenerateRequest = useMemo(
+    () => ({
+      product_name: productName,
+      product_description: productDescription,
+      target_audience: targetAudience || undefined,
+      duration_seconds: duration,
+      language,
+      cast: [],
+      celebrities: celebs,
+      notes: notes || undefined,
+    }),
+    [productName, productDescription, targetAudience, duration, language, celebs, notes],
+  );
+
+  const wpm = WPM[language];
+  const wordBand = [Math.round((duration * wpm) / 60 * 0.9), Math.round((duration * wpm) / 60 * 1.1)] as const;
+
   async function run() {
-    setLoading(true); setErr(null); setOut(null);
+    setLoading(true);
+    setErr(null);
+    setOut(null);
     try {
       setOut(await generateAd(req));
     } catch (e) {
@@ -45,194 +64,329 @@ export default function AdsTab() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${req.product_name.replace(/\s+/g, "_") || "ad"}.${format}`;
+      a.download = `${productName.replace(/\s+/g, "_") || "ad"}.${format}`;
       a.click();
       URL.revokeObjectURL(url);
-    } finally { setExportBusy(null); }
+    } finally {
+      setExportBusy(null);
+    }
   }
 
-  const disabled = loading || req.product_name.trim().length < 2 || req.product_description.trim().length < 3;
+  function addCeleb() {
+    const t = celebInput.trim();
+    if (t && !celebs.includes(t)) setCelebs([...celebs, t]);
+    setCelebInput("");
+  }
+
+  const disabled = loading || productName.trim().length < 2 || productDescription.trim().length < 3;
   const refused = err?.detail && typeof err.detail === "object" && err.detail !== null
     && (err.detail as Record<string, unknown>).error === "refused_brand_safety";
 
   return (
-    <div className="max-w-[1100px]">
-      <ToolHeader
-        eyebrow="TAB 02"
-        title="Ad Generation"
-        subtitle="Structured brief → scene-by-scene ad. Brand-safety gate + duration validator baked in."
-        chipClass="chip-ads"
+    <>
+      <ToolTopBar
+        right={
+          <>
+            <button
+              onClick={() => out && download("fountain")}
+              disabled={!out || !!exportBusy}
+              className="inline-flex items-center gap-2 rounded-pill border border-border bg-surface px-4 py-2 text-[13px] text-ink-2 hover:text-ink disabled:opacity-40"
+            >
+              <Download size={13} />
+              {exportBusy === "fountain" ? "…" : "Export as Fountain"}
+            </button>
+            <button
+              onClick={() => out && download("md")}
+              disabled={!out || !!exportBusy}
+              className="inline-flex items-center gap-2 rounded-pill bg-ink text-surface px-5 py-2 text-[14px] font-medium hover:translate-y-[-1px] transition disabled:opacity-40"
+            >
+              <Share2 size={13} />
+              {exportBusy === "md" ? "…" : "Share brief"}
+            </button>
+          </>
+        }
       />
 
-      <div className="card p-8 space-y-5">
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <label className="field-label">Product name</label>
-            <input className="field" value={req.product_name} placeholder="e.g. Cred Max"
-              onChange={(e) => setReq((r) => ({ ...r, product_name: e.target.value }))} />
-          </div>
-          <div>
-            <label className="field-label">Target audience</label>
-            <input className="field" value={req.target_audience ?? ""} placeholder="Gen Z college students in India"
-              onChange={(e) => setReq((r) => ({ ...r, target_audience: e.target.value }))} />
-          </div>
-        </div>
-        <div>
-          <label className="field-label">Description</label>
-          <textarea className="textarea-field" value={req.product_description} placeholder="Say it like you mean it — what makes this product real"
-            onChange={(e) => setReq((r) => ({ ...r, product_description: e.target.value }))} />
-        </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          <div>
-            <label className="field-label">Duration: <span className="font-semibold text-ink">{req.duration_seconds}s</span></label>
-            <input type="range" min={10} max={180} step={5} value={req.duration_seconds}
-              onChange={(e) => setReq((r) => ({ ...r, duration_seconds: parseInt(e.target.value) }))}
-              className="w-full accent-coral-deep mt-3" />
-          </div>
-          <div>
-            <label className="field-label">Language</label>
-            <select className="select-field" value={req.language}
-              onChange={(e) => setReq((r) => ({ ...r, language: e.target.value as AdGenerateRequest["language"] }))}>
-              <option value="hinglish">Hinglish</option>
-              <option value="english">English</option>
-              <option value="hindi">Hindi</option>
-            </select>
-          </div>
-          <div>
-            <label className="field-label">Notes</label>
-            <input className="field" value={req.notes ?? ""} placeholder="fun not preachy; demystify investing"
-              onChange={(e) => setReq((r) => ({ ...r, notes: e.target.value }))} />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 flex-wrap pt-2">
-          <button onClick={run} disabled={disabled} className="btn-primary">
-            {loading
-              ? <><Loader2 size={16} className="mr-2 animate-spin" />Generating…</>
-              : <><Sparkles size={16} className="mr-2" />Generate ad</>}
-          </button>
-          {out && (
-            <>
-              <button onClick={() => download("md")} disabled={!!exportBusy} className="btn-outline">
-                <Download size={14} className="mr-2" />{exportBusy === "md" ? "…" : "Markdown"}
-              </button>
-              <button onClick={() => download("fountain")} disabled={!!exportBusy} className="btn-outline">
-                <Download size={14} className="mr-2" />{exportBusy === "fountain" ? "…" : "Fountain"}
-              </button>
-              <button onClick={() => navigator.clipboard.writeText(JSON.stringify(out.data, null, 2))} className="btn-ghost">
-                <Copy size={14} className="mr-2" />JSON
-              </button>
-            </>
-          )}
-        </div>
+      <div>
+        <div className="caption text-[#7d6ec6]">TAB 02 · AD GENERATION</div>
+        <h1 className="mt-3 font-bold tracking-[-0.02em] leading-[1.08] text-[44px] text-ink">
+          Write a branded ad.
+        </h1>
       </div>
 
-      {err && (
-        <div className={`mt-6 rounded-2xl p-5 text-body ${refused ? "bg-coral/15 border border-coral/40" : "bg-butter border border-border"}`}>
-          <div className="flex items-center gap-2 font-semibold text-ink">
-            <Shield size={16} />
-            {refused ? "Refused by brand-safety gate" : "Error"}
-          </div>
-          <div className="mt-1.5 text-ink-2">
-            {refused ? (err.detail as { reason?: string }).reason : err.message}
-          </div>
-        </div>
-      )}
+      <div className="mt-8 grid lg:grid-cols-[480px_1fr] gap-5 items-start">
+        {/* ───────── LEFT: CAMPAIGN BRIEF ───────── */}
+        <aside className="card p-7 space-y-5">
+          <div className="caption text-ink-3">CAMPAIGN BRIEF</div>
 
-      {out && (
-        <div className="mt-10 space-y-6">
-          <div className="flex items-center gap-2 flex-wrap">
-            <ValidationBadge v={out.validation} />
-            {out.data.brand_safety_flags.map((f) => (
-              <span key={f} className="chip bg-butter text-ink">
-                <AlertTriangle size={12} />{f}
-              </span>
-            ))}
+          <div>
+            <label className="field-label">Product name</label>
+            <input
+              className="field"
+              value={productName}
+              placeholder="Cred Max · revolving credit card"
+              onChange={(e) => setProductName(e.target.value)}
+            />
           </div>
 
-          <div className="card-flat p-7">
-            <h2 className="font-bold tracking-[-0.015em] text-[30px] text-ink">{out.data.title}</h2>
-            <div className="mt-1 font-mono text-[12px] text-ink-3">
-              {out.data.scenes.length} scenes · {out.validation.duration_seconds}s · {out.validation.words} words
+          <div>
+            <label className="field-label">Product description</label>
+            <textarea
+              className="textarea-field min-h-[96px]"
+              value={productDescription}
+              placeholder="A credit card that gives you more credit as you use more. Targeted at young professionals with proven repayment history."
+              onChange={(e) => setProductDescription(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="field-label">Celebs to feature</label>
+            <div className="min-h-[52px] rounded-pill bg-surface border border-border px-3 py-2 flex flex-wrap items-center gap-2">
+              {celebs.map((c) => (
+                <span key={c} className="inline-flex items-center gap-1.5 rounded-pill bg-coral/25 px-3 py-1 text-[13px] text-ink">
+                  {c}
+                  <button
+                    type="button"
+                    onClick={() => setCelebs(celebs.filter((x) => x !== c))}
+                    className="hover:text-coral-deep"
+                    aria-label={`Remove ${c}`}
+                  >
+                    <X size={13} />
+                  </button>
+                </span>
+              ))}
+              <input
+                className="flex-1 min-w-[120px] bg-transparent outline-none text-[14px] px-2 py-1 placeholder:text-ink-3"
+                value={celebInput}
+                placeholder={celebs.length ? "Add another…" : "Rohan Joshi, Kusha Kapila…"}
+                onChange={(e) => setCelebInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCeleb(); }
+                  if (e.key === "Backspace" && !celebInput && celebs.length) {
+                    setCelebs(celebs.slice(0, -1));
+                  }
+                }}
+                onBlur={addCeleb}
+              />
             </div>
-            {out.data.hook && (
-              <div className="mt-5 rounded-2xl bg-gradient-sunrise p-5 text-body-l text-ink italic leading-relaxed">
-                <span className="not-italic caption text-coral-deep block mb-2">HOOK</span>
-                "{out.data.hook}"
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="field-label">Duration</label>
+              <select
+                className="select-field"
+                value={duration}
+                onChange={(e) => setDuration(parseInt(e.target.value))}
+              >
+                {DURATIONS.map((s) => (
+                  <option key={s} value={s}>{s} seconds</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="field-label">Language</label>
+              <select
+                className="select-field"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as "hinglish" | "english" | "hindi")}
+              >
+                <option value="hinglish">Hinglish (70/30)</option>
+                <option value="english">English</option>
+                <option value="hindi">Hindi</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="field-label">Target audience</label>
+            <textarea
+              className="textarea-field min-h-[80px]"
+              value={targetAudience}
+              placeholder="Urban, 22-34, tier-1 cities. Young professionals who've lived through at least one credit card scam."
+              onChange={(e) => setTargetAudience(e.target.value)}
+            />
+          </div>
+
+          <div className="rounded-2xl bg-mint/50 border border-mint px-4 py-3 flex items-center gap-2.5 text-[13px] text-ink">
+            <CheckCircle2 size={15} className="text-[#1f7a4a] shrink-0" />
+            Target word count: {wordBand[0]}-{wordBand[1]} words ({duration}s @ {wpm} WPM)
+          </div>
+
+          <button
+            onClick={run}
+            disabled={disabled}
+            className="relative w-full rounded-pill py-4 font-semibold text-ink bg-gradient-twilight shadow-card transition hover:translate-y-[-1px] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading
+              ? <><Loader2 size={16} className="animate-spin" />Generating…</>
+              : <><Sparkles size={16} />Generate ad script</>}
+          </button>
+        </aside>
+
+        {/* ───────── RIGHT: OUTPUT ───────── */}
+        <section className="space-y-5">
+          {/* Brand-safety banner */}
+          {err ? (
+            <div className={`rounded-2xl p-5 flex items-start gap-3 ${refused ? "bg-coral/15 border border-coral/40" : "bg-butter border border-border"}`}>
+              <Shield size={18} className="mt-0.5 shrink-0 text-ink" />
+              <div>
+                <div className="font-semibold text-ink">
+                  {refused ? "Refused by brand-safety gate" : "Error"}
+                </div>
+                <div className="mt-1 text-body text-ink-2">
+                  {refused ? (err.detail as { reason?: string }).reason : err.message}
+                </div>
+              </div>
+            </div>
+          ) : out ? (
+            <div className={`rounded-2xl p-5 flex items-start gap-3 ${out.data.brand_safety_flags.length === 0 ? "bg-mint/60 border border-mint" : "bg-butter border border-border"}`}>
+              {out.data.brand_safety_flags.length === 0 ? (
+                <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-[#1f7a4a]" />
+              ) : (
+                <AlertTriangle size={20} className="mt-0.5 shrink-0 text-[#a26a1a]" />
+              )}
+              <div>
+                <div className="font-semibold text-ink">
+                  {out.data.brand_safety_flags.length === 0 ? "Brand-safety gate passed" : "Brand-safety flags"}
+                </div>
+                <div className="mt-1 text-body text-ink-2">
+                  {out.data.brand_safety_flags.length === 0
+                    ? "No category conflicts. This brief matches the archive's sponsor patterns."
+                    : out.data.brand_safety_flags.join(" · ")}
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Ad script panel */}
+          <div className="card p-7">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="caption text-ink-3">
+                  AD SCRIPT{out?.data?.scenes?.length ? ` · ${out.data.scenes.length} SCENES` : ""}
+                </span>
+                {out && (
+                  <div className="flex items-center gap-2">
+                    <span className="chip bg-butter text-ink">{out.validation.duration_seconds}s</span>
+                    <span className="chip bg-peach text-ink">{out.validation.words} words</span>
+                    <span className="chip bg-lavender/70 text-ink capitalize">{language}</span>
+                    {!out.validation.valid && (
+                      <span className="chip bg-coral/25 text-coral-deep">
+                        <AlertTriangle size={11} />
+                        {out.validation.issues.join(" · ")}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              {out && (
+                <button
+                  onClick={run}
+                  className="inline-flex items-center gap-1.5 rounded-pill border border-border bg-surface px-3.5 py-1.5 text-[13px] text-ink-2 hover:text-ink"
+                >
+                  <RotateCcw size={13} /> Regenerate
+                </button>
+              )}
+            </div>
+
+            <div className="mt-6 space-y-3">
+              {out?.data?.scenes?.length ? (
+                out.data.scenes.map((s, i) => (
+                  <SceneRow key={s.scene_number} scene={s} runningStart={cumStart(out.data.scenes, i)} />
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border p-7 text-[14px] text-ink-3 text-center">
+                  Scene-by-scene ad script with director notes and dialogue will appear here.
+                </div>
+              )}
+            </div>
+
+            {out?.data?.cta && (
+              <div className="mt-5 rounded-2xl bg-gradient-sunrise p-5">
+                <div className="caption text-coral-deep">CALL TO ACTION</div>
+                <div className="mt-2 text-[17px] font-semibold text-ink">{out.data.cta}</div>
+              </div>
+            )}
+
+            {out?.data?.hook && (
+              <div className="mt-5 rounded-2xl bg-butter p-5 border border-border">
+                <div className="caption text-coral-deep">HOOK</div>
+                <div className="mt-2 text-[16px] italic text-ink">"{out.data.hook}"</div>
               </div>
             )}
           </div>
 
-          <div className="space-y-3">
-            {out.data.scenes.map((s) => (
-              <div key={s.scene_number} className="card-flat p-6">
-                <div className="flex items-center justify-between mb-4 text-[12px] font-mono text-ink-3">
-                  <span>SCENE {s.scene_number}</span>
-                  <span>{s.duration_seconds}s</span>
+          {/* Strategic rationale */}
+          <div className="rounded-2xl bg-lavender/60 p-8 border border-border">
+            <div className="caption text-[#7d6ec6]">STRATEGIC RATIONALE</div>
+            {out?.data?.strategy_rationale ? (
+              <>
+                <h3 className="mt-3 text-[22px] font-semibold text-ink leading-snug">
+                  Why this beat-structure works{productName ? ` for ${productName.split("·")[0].trim()}` : ""}
+                </h3>
+                <div className="mt-4 text-body text-ink-2 leading-relaxed whitespace-pre-wrap">
+                  {out.data.strategy_rationale}
                 </div>
-                <div className="text-[13px] text-ink-2">
-                  <span className="font-semibold text-ink">Setting:</span> {s.setting}
-                </div>
-                <div className="mt-1 text-[13px] text-ink-2">
-                  <span className="font-semibold text-ink">Direction:</span> {s.direction}
-                </div>
-                {s.characters.length > 0 && (
-                  <div className="mt-1 text-[13px] text-ink-2">
-                    <span className="font-semibold text-ink">Cast:</span> {s.characters.join(", ")}
-                  </div>
-                )}
-                <div className="mt-4 space-y-2">
-                  {s.lines.map((line, i) => (
-                    <blockquote key={i} className="border-l-2 border-coral pl-4 text-body-l text-ink leading-relaxed">
-                      {line}
-                    </blockquote>
-                  ))}
-                </div>
-              </div>
-            ))}
+              </>
+            ) : (
+              <p className="mt-3 text-body text-ink-2 leading-relaxed">
+                The reasoning behind the structure — which archive patterns this mirrors, why the
+                scene order lands, where the callbacks fire — will land here after generation.
+              </p>
+            )}
           </div>
+        </section>
+      </div>
+    </>
+  );
+}
 
-          {out.data.cta && (
-            <div className="card-flat bg-gradient-blossom p-6">
-              <div className="caption text-coral-deep mb-2">CTA</div>
-              <div className="text-body-l text-ink font-medium">{out.data.cta}</div>
-            </div>
-          )}
+function cumStart(scenes: { duration_seconds: number }[], idx: number): number {
+  let s = 0;
+  for (let i = 0; i < idx; i++) s += scenes[i]?.duration_seconds ?? 0;
+  return s;
+}
 
-          {out.data.strategy_rationale && (
-            <div>
-              <div className="caption text-coral-deep mb-3">STRATEGY RATIONALE</div>
-              <div className="card-flat p-6 text-body text-ink-2 leading-relaxed">{out.data.strategy_rationale}</div>
-            </div>
-          )}
-
-          {out.data.citations.length > 0 && (
-            <div>
-              <div className="caption text-coral-deep mb-3">CITATIONS · {out.data.citations.length}</div>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {out.data.citations.map((c, i) => <CitationCard key={c.source_id + i} idx={i + 1} c={c} />)}
-              </div>
-            </div>
+function SceneRow({ scene, runningStart }: { scene: AdGenerateResponse["scenes"][number]; runningStart: number }) {
+  const end = runningStart + scene.duration_seconds;
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-5 flex gap-5">
+      <div className="shrink-0 w-12 text-center">
+        <div className="h-9 w-9 rounded-full bg-gradient-sunrise grid place-items-center font-semibold text-ink">
+          {scene.scene_number}
+        </div>
+        <div className="mt-2 text-[10px] font-mono text-ink-3">
+          {fmt(runningStart)}-{fmt(end)}
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[15px] font-semibold text-ink">{scene.setting || `Scene ${scene.scene_number}`}</span>
+          {scene.direction && (
+            <span className="chip bg-lavender/60 text-[#7d6ec6] text-[11px]">{truncate(scene.direction, 40)}</span>
           )}
         </div>
-      )}
+        {scene.characters.length > 0 && (
+          <div className="mt-1 text-[12px] text-ink-3">{scene.characters.join(" · ")}</div>
+        )}
+        <div className="mt-2 space-y-1.5">
+          {scene.lines.map((line, i) => (
+            <div key={i} className="text-[14px] text-ink leading-relaxed">
+              {line}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function ValidationBadge({ v }: { v: AdValidation }) {
-  if (v.valid) {
-    return (
-      <span className="chip bg-mint text-ink">
-        <span className="h-1.5 w-1.5 rounded-full bg-green-600" />
-        VALIDATED · {v.duration_seconds}s
-      </span>
-    );
-  }
-  return (
-    <span className="chip bg-butter text-ink">
-      <AlertTriangle size={12} />
-      {v.issues.join(" · ") || "validation warning"}
-    </span>
-  );
+function fmt(s: number) {
+  const m = Math.floor(s / 60);
+  const ss = Math.floor(s % 60);
+  return `${m}:${String(ss).padStart(2, "0")}`;
+}
+function truncate(s: string, n: number) {
+  return s.length > n ? s.slice(0, n - 1) + "…" : s;
 }
