@@ -111,12 +111,22 @@ class QaConfidence(str, Enum):
     REFUSED_SENSITIVE = "refused_sensitive"
 
 
+class VerifiedClaim(BaseModel):
+    claim: str
+    citation_indices: list[int] = Field(default_factory=list)
+    supported: bool = False
+
+
 class QaResponse(BaseModel):
     status: QaConfidence
     answer: str | None = None
     reason: str | None = None
     citations: list[Citation] = Field(default_factory=list)
     max_similarity: float | None = None
+    verified_claims: list[VerifiedClaim] = Field(default_factory=list)
+    n_supported: int = 0
+    n_unsupported: int = 0
+    paraphrases_used: list[str] = Field(default_factory=list)
 
 
 class Chunk(BaseModel):

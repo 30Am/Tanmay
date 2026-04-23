@@ -142,6 +142,62 @@ class RAGEngine:
             collection=QDRANT_EXEMPLARS,
         )
 
+    async def paraphrase_query(self, question: str, *, n: int = 2) -> list[str]:
+        """Generate `n` paraphrases of the user's question via Haiku.
+
+        Returns the list WITHOUT the original — caller combines if needed.
+        """
+        system = (
+            "Rewrite the user's question into {n} alternative phrasings that preserve meaning "
+            "but use different vocabulary and sentence structure. Return one per line, no bullets, "
+            "no numbering, no prose."
+        ).format(n=n)
+        response = await self.anthropic.messages.create(
+            model=ANTHROPIC_UTILITY,
+            system=system,
+            messages=[{"role": "user", "content": question}],
+            max_tokens=200,
+            temperature=0.3,
+        )
+        text = "".join(b.text for b in response.content if b.type == "text")
+        paraphrases = [line.strip() for line in text.splitlines() if line.strip()]
+        return paraphrases[:n]
+
+    async def multi_query_retrieve(
+        self,
+        queries: list[str],
+        *,
+        limit: int = 12,
+        tanmay_only: bool = False,
+        register_any: list[str] | None = None,
+    ) -> tuple[list[RetrievedChunk], float]:
+        """Retrieve for each query, fuse results with Reciprocal Rank Fusion (RRF).
+
+        RRF score per chunk: sum over queries of 1 / (60 + rank). Chunks that surface on
+        multiple queries get boosted. Returns (fused_chunks, max_similarity_seen).
+        """
+        import asyncio
+
+        per_query = await asyncio.gather(
+            *(self.retrieve(q, limit=limit, tanmay_only=tanmay_only, register_any=register_any) for q in queries)
+        )
+
+        rrf_score: dict[str, float] = {}
+        best_chunk: dict[str, RetrievedChunk] = {}
+        max_sim = 0.0
+        RRF_K = 60  # standard RRF constant
+
+        for chunks in per_query:
+            for rank, c in enumerate(chunks):
+                rrf_score[c.chunk_id] = rrf_score.get(c.chunk_id, 0.0) + 1.0 / (RRF_K + rank + 1)
+                # Keep best-scoring version (for displaying similarity)
+                if c.chunk_id not in best_chunk or (c.score > best_chunk[c.chunk_id].score):
+                    best_chunk[c.chunk_id] = c
+                max_sim = max(max_sim, c.score)
+
+        fused = sorted(best_chunk.values(), key=lambda c: rrf_score[c.chunk_id], reverse=True)
+        return fused[:limit], max_sim
+
     @staticmethod
     def _to_chunk(point: Any) -> RetrievedChunk:
         p = point.payload or {}

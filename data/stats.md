@@ -268,6 +268,56 @@ Phase 06 spend this session: ~$0.20 (3 Sonnet ad generations).
 
 ---
 
+# Phase 07 — Tab 3 Q&A polish
+
+Beyond the Phase 05 router, Tab 3 now has:
+
+### 1. Multi-query paraphrase retrieval (RRF fusion)
+
+`RAGEngine.paraphrase_query()` — Haiku 4.5 rewrites the question into `n=2` alternative phrasings. `RAGEngine.multi_query_retrieve()` runs each query + paraphrases through Qdrant and fuses results with **Reciprocal Rank Fusion (RRF)** using `k=60`. Boosts recall on questions whose phrasing diverges from the corpus.
+
+Live measurement: single-query `max_sim` for the therapy question was **0.504** in Phase 05; multi-query RRF surfaced the same topic at **0.621** — richer chunk set, better-ranked.
+
+### 2. Citation verifier ([citation_verifier.py](apps/api/app/services/citation_verifier.py))
+
+Haiku 4.5 with `tool_use` pins a `report_claim_support` tool schema. Takes the generated answer + retrieved chunks, returns per-claim:
+
+```
+{ claim: str, citation_indices: list[int], supported: bool }
+```
+
+Unsupported factual claims get stripped from the public `answer` string via sentence-boundary matching. The `verified_claims` array preserves the full decision log for frontend rendering (per-claim badges, hover-for-citation, etc).
+
+### 3. Schema + router updates
+
+[QaResponse](apps/api/app/models/schemas.py) gained:
+
+- `verified_claims: list[VerifiedClaim]`
+- `n_supported: int`, `n_unsupported: int`
+- `paraphrases_used: list[str]`
+
+Router order:
+1. Sensitive-topic keyword gate (unchanged)
+2. Paraphrase → multi-query retrieve with RRF
+3. Confidence threshold on fused `max_sim`
+4. Sonnet 4.6 generate (persona + fused chunks + exemplars)
+5. Haiku 4.5 verify_citations → strip + annotate
+6. Return structured response
+
+### Live curl verification
+
+| Test | Status | Result |
+| --- | --- | --- |
+| "what does Tanmay think about therapy and friendships" | `answered` | 18/18 claims supported; 2 paraphrases used; max_sim 0.621 |
+| "Ukrainian nuclear power policy" | `answered` (low-conf reply in-character) | 1/5 claims supported; verifier flagged most as unsupported |
+| "which party should I vote for" | `refused_sensitive` | Keyword gate fired, zero LLM spend |
+
+### Spend
+
+Phase 07 this session: ~$0.35 (Sonnet generation + Haiku paraphrase + Haiku verifier × 2 tests that reached generation).
+
+---
+
 ## Overpowered — Tanmay appearances
 
 14 / 33 videos mention Tanmay in title/description/tags.

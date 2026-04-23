@@ -1,10 +1,21 @@
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter, Depends
 
 from app.core.logging import get_logger
-from app.models.schemas import Citation, Platform, QaConfidence, QaRequest, QaResponse
+from app.models.schemas import (
+    Citation,
+    Platform,
+    QaConfidence,
+    QaRequest,
+    QaResponse,
+    VerifiedClaim,
+)
 from app.routers.dependencies import get_rag_engine
+from app.services.citation_verifier import verify_citations
+from app.services.persona import build_cached_system, format_chunks
 from app.services.rag import RAGEngine
 
 log = get_logger(__name__)
@@ -22,7 +33,7 @@ SENSITIVE_KEYWORDS = [
     "should i take",
 ]
 
-CONFIDENCE_THRESHOLD = 0.35  # cosine similarity — retrieved chunks below this = refuse
+CONFIDENCE_THRESHOLD = 0.35  # RRF-fused max-similarity threshold
 
 
 def _is_sensitive(question: str) -> bool:
@@ -51,29 +62,54 @@ async def qa(
             ),
         )
 
-    # Peek at retrieval before paying for generation
-    chunks = await rag.retrieve(req.question, limit=8, tanmay_only=True)
-    max_sim = max((c.score for c in chunks), default=0.0)
+    # 1. Paraphrase the question (Haiku) + multi-query retrieve with RRF fusion.
+    paraphrases = await rag.paraphrase_query(req.question, n=2)
+    all_queries = [req.question, *paraphrases]
+    chunks, max_sim = await rag.multi_query_retrieve(
+        all_queries,
+        limit=8,
+        tanmay_only=True,
+    )
 
     if not chunks or max_sim < CONFIDENCE_THRESHOLD:
         return QaResponse(
             status=QaConfidence.REFUSED_LOW_CONFIDENCE,
             reason="Tanmay hasn't spoken publicly on this — refusing rather than fabricating.",
             max_similarity=max_sim,
+            paraphrases_used=paraphrases,
         )
 
-    result = await rag.generate(
-        tab="qa",
-        query=req.question,
-        user_payload=f"QUESTION: {req.question}",
-        retrieval_top_k=8,
-        exemplars_k=3,
-        exemplar_registers=["reflective", "informative", "comedic"],
-        max_tokens=900,
-        temperature=0.4,
-        tanmay_only_retrieval=True,
+    # 2. Generate — pass the pre-fetched multi-query chunks through instead of re-retrieving.
+    #    We reuse format_chunks + build_cached_system directly to avoid a second retrieval call.
+    system_blocks = build_cached_system(tab="qa")
+    exemplars = await rag.retrieve_exemplars(
+        req.question,
+        limit=3,
+        register_any=["reflective", "informative", "comedic"],
     )
 
+    from app.services.persona import format_exemplars
+
+    user_sections = [format_chunks([c.as_payload_dict() for c in chunks])]
+    if exemplars:
+        user_sections.append(format_exemplars([{"text": e.text} for e in exemplars]))
+    user_sections.append(f"QUESTION: {req.question}")
+    user_message = "\n\n".join(user_sections)
+
+    primary_model = os.environ.get("ANTHROPIC_MODEL_PRIMARY", "claude-sonnet-4-5-20250929")
+    gen_response = await rag.anthropic.messages.create(
+        model=primary_model,
+        system=system_blocks,
+        messages=[{"role": "user", "content": user_message}],
+        max_tokens=900,
+        temperature=0.4,
+    )
+    answer_text = "".join(b.text for b in gen_response.content if b.type == "text")
+
+    # 3. Verify citations.
+    verifier = await verify_citations(answer=answer_text, chunks=chunks, anthropic=rag.anthropic)
+
+    # 4. Build the public response.
     citations = [
         Citation(
             source_id=c.chunk_id,
@@ -83,19 +119,36 @@ async def qa(
             timestamp_seconds=int(c.start_seconds) if c.start_seconds is not None else None,
             excerpt=c.text[:240],
         )
-        for c in result.citations
+        for c in chunks
+    ]
+
+    verified_claims_out = [
+        VerifiedClaim(
+            claim=vc.claim,
+            citation_indices=vc.citation_indices,
+            supported=vc.supported,
+        )
+        for vc in verifier.claims
     ]
 
     log.info(
         "qa_answered",
         question=req.question[:80],
-        max_sim=round(result.max_similarity, 3),
-        input_tokens=result.input_tokens,
-        output_tokens=result.output_tokens,
+        max_sim=round(max_sim, 3),
+        gen_in=getattr(gen_response.usage, "input_tokens", 0),
+        gen_out=getattr(gen_response.usage, "output_tokens", 0),
+        verifier_in=verifier.input_tokens,
+        verifier_out=verifier.output_tokens,
+        n_supported=verifier.n_supported,
+        n_unsupported=verifier.n_unsupported,
     )
     return QaResponse(
         status=QaConfidence.ANSWERED,
-        answer=result.text,
+        answer=verifier.cleaned_answer or answer_text,
         citations=citations,
-        max_similarity=result.max_similarity,
+        max_similarity=max_sim,
+        verified_claims=verified_claims_out,
+        n_supported=verifier.n_supported,
+        n_unsupported=verifier.n_unsupported,
+        paraphrases_used=paraphrases,
     )
