@@ -214,6 +214,60 @@ All three tabs produced coherent Tanmay-voice output for **~$0.03 total**.
 
 ---
 
+# Phase 06 — Tab 2 Ad Generation polish
+
+Beyond the Phase 05 router skeleton, Tab 2 now has:
+
+### 1. Strict JSON via Anthropic tool_use
+
+[rag.py](apps/api/app/services/rag.py) now exposes `generate_with_tool()` that forces the model to emit a schema-valid tool call. The ad router defines an `emit_ad_script` tool with full JSON Schema (title/hook/scenes[]/cta/strategy_rationale/brand_safety_flags) and `tool_choice` pins it. No more JSON-parse failures, no markdown-fence stripping.
+
+### 2. Duration + wordcount validator
+
+[ad_validate.py](apps/api/app/services/ad_validate.py) checks:
+- Sum of scene `duration_seconds` vs target (±2s tolerance)
+- Total word count vs `target_duration_s × wps[language]` (±25% band)
+- Each scene has lines + positive duration
+
+Validation metadata returned via response headers:
+- `X-Ad-Valid: true|false`
+- `X-Ad-Duration: <int>s`
+- `X-Ad-Words: <int>`
+- `X-Ad-Validation-Issues: duration_mismatch;wordcount_off` (semicolon list)
+
+### 3. Brand-safety gate — pre-generation refusal
+
+Deterministic keyword-based gate ([brand_safety.py](apps/api/app/services/brand_safety.py)) runs BEFORE the LLM. Refused categories (real-money gaming, predatory finance, sketchy crypto, pseudoscience health) trigger HTTP 422 with a structured refusal response — zero LLM spend on rejected briefs.
+
+Tested: rummy-for-cash brief returns 422 `refused_brand_safety` with `flags: ["real_money_gaming"]`. Clean products pass through.
+
+### 4. Retrieval entity boost
+
+`generate_with_tool()` accepts `entity_boost_term` that bumps chunks whose `topic_tags` match the product brand by +0.15 before reranking. Cheapest way to bias retrieval toward ad-adjacent content without retagging the corpus.
+
+### 5. Export formats — Markdown and Fountain
+
+[ad_export.py](apps/api/app/services/ad_export.py) with `to_markdown()` and `to_fountain()`.
+Route: `POST /generate/ad?format=md|fountain|json`
+- `md` — human-readable Markdown with scene headers, dialogue blockquotes, citations
+- `fountain` — industry-standard screenplay format, opens in Highland / Slugline / Final Draft. Handles Devanagari Hindi script correctly.
+- `json` — default, with validator headers
+
+**PDF deliberately NOT server-side** — frontend (Phase 08) will render print-to-PDF from the structured response. Keeps server deps lean.
+
+### Live curl verification
+
+| Test | Model | Result |
+| --- | --- | --- |
+| Rummy-for-cash brief (brand-safety refusal) | — | 422, zero LLM spend |
+| Stonks Neobank 30s hinglish ad, JSON | Sonnet 4.6 | 200, valid except wordcount (87 vs 86 ceiling) |
+| Stonks Neobank 20s, MD export | Sonnet 4.6 | 200, clean Markdown |
+| Stonks Neobank 20s, Fountain export | Sonnet 4.6 | 200, valid Fountain with Hindi |
+
+Phase 06 spend this session: ~$0.20 (3 Sonnet ad generations).
+
+---
+
 ## Overpowered — Tanmay appearances
 
 14 / 33 videos mention Tanmay in title/description/tags.

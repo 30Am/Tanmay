@@ -222,3 +222,104 @@ class RAGEngine:
             cache_read_tokens=getattr(usage, "cache_read_input_tokens", 0) or 0,
             cache_creation_tokens=getattr(usage, "cache_creation_input_tokens", 0) or 0,
         )
+
+    async def generate_with_tool(
+        self,
+        *,
+        tab: str,
+        query: str,
+        tool_name: str,
+        tool_description: str,
+        tool_schema: dict[str, Any],
+        user_payload: str | None = None,
+        tone: Any = None,
+        model: str | None = None,
+        max_tokens: int = 2048,
+        temperature: float = 0.7,
+        retrieval_top_k: int = 12,
+        exemplars_k: int = 5,
+        exemplar_registers: list[str] | None = None,
+        tanmay_only_retrieval: bool = True,
+        entity_boost_term: str | None = None,
+    ) -> tuple[dict[str, Any], GenerationResult]:
+        """Generate with Anthropic tool_use — model must emit tool input matching schema.
+
+        Returns (tool_input_dict, GenerationResult). The tool_input is the schema-valid
+        structured output; the GenerationResult carries citations + usage + cost.
+
+        `entity_boost_term` re-ranks retrieved chunks by bumping any chunk whose `entities`
+        payload contains that term (case-insensitive substring match). Useful for ad
+        generation: boost chunks that have mentioned the brand/product category.
+        """
+        import asyncio
+
+        retrieval_task = self.retrieve(
+            query,
+            limit=retrieval_top_k,
+            tanmay_only=tanmay_only_retrieval,
+        )
+        exemplars_task = self.retrieve_exemplars(
+            query,
+            limit=exemplars_k,
+            register_any=exemplar_registers,
+        )
+        chunks, exemplars = await asyncio.gather(retrieval_task, exemplars_task)
+
+        if entity_boost_term:
+            term = entity_boost_term.lower()
+
+            def boost_score(c: RetrievedChunk) -> float:
+                # Fetch entities via payload-side attribute; if unavailable, just use score
+                ents = []
+                # RetrievedChunk doesn't carry entities, but topic_tags is a softer proxy
+                for t in (c.topic_tags or []):
+                    if term in t.lower():
+                        return c.score + 0.15
+                return c.score
+
+            chunks = sorted(chunks, key=boost_score, reverse=True)
+
+        max_sim = max((c.score for c in chunks), default=0.0)
+        system_blocks = build_cached_system(tab=tab, tone=tone)
+
+        user_sections = [format_chunks([c.as_payload_dict() for c in chunks])]
+        if exemplars:
+            user_sections.append(format_exemplars([{"text": e.text} for e in exemplars]))
+        user_sections.append(f"USER INPUT:\n{user_payload or query}")
+        user_message = "\n\n".join(user_sections)
+
+        tool = {
+            "name": tool_name,
+            "description": tool_description,
+            "input_schema": tool_schema,
+        }
+
+        response = await self.anthropic.messages.create(
+            model=model or ANTHROPIC_PRIMARY,
+            system=system_blocks,
+            messages=[{"role": "user", "content": user_message}],
+            max_tokens=max_tokens,
+            temperature=temperature,
+            tools=[tool],
+            tool_choice={"type": "tool", "name": tool_name},
+        )
+
+        tool_input: dict[str, Any] = {}
+        text_parts: list[str] = []
+        for block in response.content:
+            if block.type == "tool_use" and block.name == tool_name:
+                tool_input = dict(block.input)
+            elif block.type == "text":
+                text_parts.append(block.text)
+
+        usage = response.usage
+        result = GenerationResult(
+            text="".join(text_parts),
+            citations=chunks,
+            max_similarity=max_sim,
+            input_tokens=getattr(usage, "input_tokens", 0),
+            output_tokens=getattr(usage, "output_tokens", 0),
+            cache_read_tokens=getattr(usage, "cache_read_input_tokens", 0) or 0,
+            cache_creation_tokens=getattr(usage, "cache_creation_input_tokens", 0) or 0,
+        )
+        return tool_input, result
