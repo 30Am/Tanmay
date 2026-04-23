@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from functools import lru_cache
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -28,7 +30,7 @@ class Settings(BaseSettings):
     cohere_rerank_model: str = "rerank-3"
 
     qdrant_url: str = "http://localhost:6333"
-    qdrant_api_key: str | None = None
+    qdrant_api_key: Optional[str] = None
     qdrant_collection: str = "tanmay_chunks"
     qdrant_exemplars_collection: str = "tanmay_exemplars"
 

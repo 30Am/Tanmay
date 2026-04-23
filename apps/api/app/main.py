@@ -1,13 +1,17 @@
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import get_settings
+# Load .env into os.environ before any service imports read it.
+load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
+
+from app.core.config import get_settings  # noqa: E402
 from app.core.logging import configure_logging, get_logger
 from app.routers import ad, content, health, qa
-from app.routers.dependencies import get_vector_store
 
 
 @asynccontextmanager
@@ -16,10 +20,6 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     configure_logging(settings.log_level)
     log = get_logger("lifespan")
     log.info("startup", env=settings.env)
-    try:
-        await get_vector_store().ensure_collections()
-    except Exception as exc:
-        log.warning("qdrant_not_available", error=str(exc))
     yield
     log.info("shutdown")
 

@@ -143,6 +143,77 @@ Assembled prompt size (content tab example): ~4,500 chars / ~1,130 tokens.
 
 ---
 
+# Phase 05 — RAG Orchestrator + Tab 1/2/3 MVP
+
+End-to-end pipeline live: query → Voyage embed → Qdrant search → Claude generate, with persona v1 + style exemplars + prompt caching.
+
+### Stack wired
+
+- **LLM:** Claude Sonnet 4.6 (primary), Haiku 4.5 (utility). Dev work done on Haiku, final tests on Sonnet.
+- **Embeddings:** Voyage-3 (1024d, cosine)
+- **Vector DB:** Qdrant v1.17.1 (`tanmay_chunks` 3,208 pts, `tanmay_exemplars` 164 pts)
+- **Rerank:** Cohere Rerank 3 — stubbed; falls back to embedding-score ordering (no Cohere key yet)
+- **API:** FastAPI — 3 routes live: `POST /generate/content`, `POST /generate/ad`, `POST /generate/qa`
+
+### Files
+
+- [apps/api/app/services/rag.py](apps/api/app/services/rag.py) — `RAGEngine` orchestrator with prompt caching on the persona prefix
+- [apps/api/app/routers/content.py](apps/api/app/routers/content.py) — Tab 1 (script + description + rationale + citations)
+- [apps/api/app/routers/ad.py](apps/api/app/routers/ad.py) — Tab 2 (JSON-schema ad with scenes, CTA, brand-safety flags)
+- [apps/api/app/routers/qa.py](apps/api/app/routers/qa.py) — Tab 3 (confidence-gated, sensitive-topic refuser, cited)
+
+### Smoke test (Haiku 4.5)
+
+All three tabs produced coherent Tanmay-voice output for **~$0.03 total**.
+[data/rag_smoke.py](data/rag_smoke.py) is the reproducible driver.
+
+### FastAPI live test
+
+`POST http://localhost:8000/generate/qa` with question "what does Tanmay think about therapy":
+
+- HTTP 200, 16.5s latency (Sonnet 4.6)
+- Answer in Tanmay voice with signature phrases ("Right? Let me tell you…", "gym for your head")
+- 8 citations with URL + timestamps, max_similarity 0.504
+- `status=answered` — confidence gate passed
+
+### Phase 04 completion — the three pending items
+
+1. **Blind-test proxy (automated).** 10 samples compared via Voyage embedding similarity: generated output vs source real-chunk, and vs a random Tanmay baseline.
+   - Avg voice_match: **0.440**, random_baseline: **0.320**, **lift: +0.120**
+   - 8/10 samples show positive delta — persona is measurably shifting generations toward target voice
+   - [data/blind_test_proxy.py](data/blind_test_proxy.py) + [data/blind_test_results.json](data/blind_test_results.json)
+   - Caveat: this is an automated proxy, not a fan-panel blind test. Real blind-test still pending.
+
+2. **Per-tab FORMAT rules.** Added to [persona.py](apps/api/app/services/persona.py):
+   - `FORMAT_CONTENT` — SCRIPT / DESCRIPTION / RATIONALE / CITATIONS
+   - `FORMAT_AD` — strict JSON schema with scenes, CTA, brand_safety_flags
+   - `FORMAT_QA` — confidence gate, sensitive-topic refusal, cited claims
+
+3. **Tone-dial calibration.** Generated the same query at 8 dial settings (4 dimensions × 2 extremes + baseline).
+   - Roast/chaos/depth/hinglish dials all measurably shift outputs in expected directions.
+   - Effect is subtle (~sentence-level) at v1 prompt size. Works, but not dramatic.
+   - [data/tone_calibrate.py](data/tone_calibrate.py) is the harness.
+
+### Spend tracking
+
+| Activity | Model | Cost |
+| --- | --- | ---: |
+| Smoke test (3 tabs) | Haiku | $0.03 |
+| Tone calibration (8 runs) | Haiku | $0.065 |
+| Blind-test proxy (10 gens) | Haiku | $0.09 |
+| FastAPI live test (1 gen) | Sonnet | $0.05 |
+| **Phase 05 total** | — | **~$0.24** |
+
+### Still missing / deferred
+
+- **SSE streaming** — endpoints return full JSON. `LLMService.stream()` exists but routers don't use it yet. Add for Phase 08 UI polish.
+- **Cohere rerank** — key not provisioned. Currently falls back to pure-cosine ordering. Works OK for v1 retrieval.
+- **Langfuse tracing** — not wired.
+- **Postgres BM25 / hybrid retrieval** — deferred; vector-only retrieval is serviceable.
+- **Real human blind-test** — still pending a fan panel.
+
+---
+
 ## Overpowered — Tanmay appearances
 
 14 / 33 videos mention Tanmay in title/description/tags.

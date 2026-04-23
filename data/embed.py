@@ -32,7 +32,7 @@ sys.path.insert(0, str(REPO_ROOT))
 # Load apps/api/.env into os.environ before importing pipeline modules.
 from dotenv import load_dotenv  # noqa: E402
 
-load_dotenv(REPO_ROOT / "apps" / "api" / ".env", override=False)
+load_dotenv(REPO_ROOT / "apps" / "api" / ".env", override=True)
 
 from packages.ingestion.pipeline.chunker import Word, chunk_transcript  # noqa: E402
 from packages.ingestion.pipeline.embedder import EmbeddedChunk, Embedder, QdrantUpserter  # noqa: E402

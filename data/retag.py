@@ -22,7 +22,7 @@ REPO_ROOT = DATA.parent
 sys.path.insert(0, str(REPO_ROOT))
 from dotenv import load_dotenv  # noqa: E402
 
-load_dotenv(REPO_ROOT / "apps" / "api" / ".env", override=False)
+load_dotenv(REPO_ROOT / "apps" / "api" / ".env", override=True)
 
 from qdrant_client import AsyncQdrantClient  # noqa: E402
 
