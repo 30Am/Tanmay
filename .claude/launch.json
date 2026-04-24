@@ -3,25 +3,24 @@
   "configurations": [
     {
       "name": "Qdrant vector DB",
-      "runtimeExecutable": "/Users/amlannttripathy/Downloads/Tanmaygpt/infra/qdrant/qdrant",
-      "runtimeArgs": [],
+      "runtimeExecutable": "/usr/bin/env",
+      "runtimeArgs": [
+        "QDRANT__STORAGE__STORAGE_PATH=/Users/amlannttripathy/Downloads/Tanmaygpt/infra/qdrant/storage",
+        "/Users/amlannttripathy/Downloads/Tanmaygpt/infra/qdrant/qdrant"
+      ],
       "port": 6333
     },
     {
       "name": "FastAPI backend (uvicorn)",
-      "runtimeExecutable": "/usr/bin/env",
+      "runtimeExecutable": "/Users/amlannttripathy/.local/bin/uv",
       "runtimeArgs": [
-        "PYTHONPATH=/Users/amlannttripathy/Downloads/Tanmaygpt/apps/api",
-        "python3",
-        "-m",
+        "run",
+        "--directory", "/Users/amlannttripathy/Downloads/Tanmaygpt/apps/api",
         "uvicorn",
         "app.main:app",
-        "--port",
-        "8000",
-        "--loop",
-        "asyncio",
-        "--http",
-        "h11"
+        "--port", "8000",
+        "--loop", "asyncio",
+        "--http", "h11"
       ],
       "port": 8000
     },

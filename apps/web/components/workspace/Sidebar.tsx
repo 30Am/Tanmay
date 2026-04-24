@@ -14,7 +14,7 @@ const CREATE = [
 ];
 
 const WORKSPACE = [
-  { href: "#", label: "History", dot: "bg-periwinkle" },
+  { href: "/app/history", label: "History", dot: "bg-periwinkle" },
   { href: "#", label: "Templates", dot: "bg-lilac" },
   { href: "#", label: "Tone dial", dot: "bg-aqua" },
   { href: "#", label: "Extension", dot: "bg-peach", tag: "NEW" },

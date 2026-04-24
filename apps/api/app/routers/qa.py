@@ -4,6 +4,8 @@ import os
 
 from fastapi import APIRouter, Depends
 
+from langfuse import get_client
+
 from app.core.logging import get_logger
 from app.models.schemas import (
     Citation,
@@ -27,10 +29,20 @@ SENSITIVE_KEYWORDS = [
     "religion",
     "hindu vs",
     "muslim vs",
-    "suicide",
+    "suicid",       # catches: suicide, suicidal, suicidality
     "self harm",
+    "self-harm",
     "diagnose",
     "should i take",
+    "kashmir",
+    "ram mandir",
+    "ayodhya",
+    "caa ",         # Citizenship Amendment Act (trailing space avoids "because")
+    "nrc ",
+    "article 370",
+    "partition",
+    "pakistan vs",
+    "india vs pakistan",
 ]
 
 CONFIDENCE_THRESHOLD = 0.35  # RRF-fused max-similarity threshold
@@ -52,6 +64,12 @@ async def qa(
     req: QaRequest,
     rag: RAGEngine = Depends(get_rag_engine),
 ) -> QaResponse:
+    lf = get_client()
+    with lf.start_as_current_observation(name="qa", as_type="span", input={"question": req.question}):
+        return await _qa_inner(req, rag, lf)
+
+
+async def _qa_inner(req: QaRequest, rag: RAGEngine, lf) -> QaResponse:  # type: ignore[no-untyped-def]
     if _is_sensitive(req.question):
         return QaResponse(
             status=QaConfidence.REFUSED_SENSITIVE,
@@ -131,6 +149,13 @@ async def qa(
         for vc in verifier.claims
     ]
 
+    lf.update_current_span(output={
+        "status": "answered",
+        "max_similarity": round(max_sim, 4),
+        "n_supported": verifier.n_supported,
+        "n_unsupported": verifier.n_unsupported,
+        "citations": len(chunks),
+    })
     log.info(
         "qa_answered",
         question=req.question[:80],

@@ -2,41 +2,68 @@
 
 import { useState } from "react";
 import { Copy, Loader2, RotateCcw, Sparkles } from "lucide-react";
-import { generateContent } from "@/lib/api";
+import { generateContentStream } from "@/lib/api";
 import type { ContentGenerateRequest, ContentGenerateResponse, ToneDial as ToneDialT } from "@/lib/types";
+import { saveToHistory } from "@/lib/history";
 import ToneDial from "@/components/workspace/ToneDial";
 import ToolTopBar from "@/components/workspace/ToolTopBar";
 
 type Format = ContentGenerateRequest["format"];
 const FORMATS: { value: Format; label: string }[] = [
-  { value: "reel", label: "Reaction video" },
-  { value: "thread", label: "Twitter / X thread" },
-  { value: "long_podcast", label: "Podcast cold-open" },
-  { value: "stage", label: "Stage bit" },
+  { value: "reel",          label: "Instagram Reel" },
+  { value: "youtube_short", label: "YouTube Short" },
+  { value: "talking_head",  label: "Talking Head" },
+  { value: "reaction",      label: "Reaction video" },
+  { value: "long_podcast",  label: "Podcast cold-open" },
+  { value: "thread",        label: "Twitter / X thread" },
+  { value: "stage",         label: "Stage bit" },
+  { value: "monologue",     label: "Stand-up monologue" },
+  { value: "explainer",     label: "Explainer" },
+  { value: "interview",     label: "Interview / conversation" },
 ];
 
 const LENGTHS = [30, 45, 60, 90, 120, 180, 300, 600];
 
 const DEFAULT_TONE: ToneDialT = { roast_level: 0.62, chaos: 0.4, depth: 0.78, hinglish_ratio: 0.55 };
 
+type Language = "hinglish" | "english" | "hindi";
+
 export default function ContentTab() {
   const [idea, setIdea] = useState("");
   const [format, setFormat] = useState<Format>("reel");
   const [length, setLength] = useState(90);
+  const [language, setLanguage] = useState<Language>("hinglish");
   const [tone, setTone] = useState<ToneDialT>(DEFAULT_TONE);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [out, setOut] = useState<ContentGenerateResponse | null>(null);
+  const [streamingText, setStreamingText] = useState("");
   const [savedAt, setSavedAt] = useState<Date | null>(null);
 
   async function run() {
     setLoading(true);
     setErr(null);
     setOut(null);
+    setStreamingText("");
     try {
-      const res = await generateContent({ idea, format, target_length_seconds: length, tone });
-      setOut(res);
-      setSavedAt(new Date());
+      for await (const event of generateContentStream({ idea, format, target_length_seconds: length, tone, language })) {
+        if (event.type === "token") {
+          setStreamingText((prev) => prev + event.text);
+        } else {
+          const result = { script: event.script, description: event.description, rationale: event.rationale, citations: event.citations };
+          setOut(result);
+          setStreamingText("");
+          setSavedAt(new Date());
+          if (result.script) {
+            saveToHistory({
+              tab: "content",
+              label: idea.length > 60 ? idea.slice(0, 57) + "…" : idea,
+              input: idea,
+              preview: result.script.slice(0, 200),
+            });
+          }
+        }
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {
@@ -116,6 +143,26 @@ export default function ContentTab() {
             </div>
           </div>
 
+          <div>
+            <label className="field-label">Language</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["hinglish", "english", "hindi"] as Language[]).map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setLanguage(lang)}
+                  className={`rounded-pill py-2.5 text-[13px] font-medium capitalize border transition
+                    ${language === lang
+                      ? "bg-ink text-surface border-ink"
+                      : "bg-surface text-ink-2 border-border hover:border-ink-2 hover:text-ink"
+                    }`}
+                >
+                  {lang === "hinglish" ? "Hinglish" : lang === "english" ? "English" : "Hindi"}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <ToneDial value={tone} onChange={setTone} onReset={() => setTone(DEFAULT_TONE)} />
 
           <button
@@ -171,8 +218,10 @@ export default function ContentTab() {
             <div className="mt-5 text-[16px] leading-[1.7] text-ink whitespace-pre-wrap">
               {out?.script ? (
                 out.script
+              ) : streamingText ? (
+                streamingText
               ) : loading ? (
-                <span className="text-ink-3">Drafting the script with source-grounded context…</span>
+                <span className="text-ink-3">Retrieving context, first tokens incoming…</span>
               ) : (
                 <span className="text-ink-3">
                   Drop an idea on the left and hit <span className="text-ink">Generate</span>.

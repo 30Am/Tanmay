@@ -1,15 +1,83 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, Download, Loader2, RotateCcw, Share2, Shield, Sparkles, X } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Download, Loader2, RotateCcw, Share2, Shield, Sparkles, Star, X } from "lucide-react";
 import { exportAd, generateAd } from "@/lib/api";
-import type { AdGenerateRequest, AdGenerateResponse, AdValidation } from "@/lib/types";
+import type {
+  AdGenerateRequest,
+  AdGenerateResponse,
+  AdPlacement,
+  AdValidation,
+  BrandVoiceTag,
+  CampaignGoal,
+  Industry,
+  ProductStage,
+  ToneDial as ToneDialT,
+} from "@/lib/types";
+import { saveToHistory } from "@/lib/history";
+import ToneDial from "@/components/workspace/ToneDial";
 import ToolTopBar from "@/components/workspace/ToolTopBar";
 
 const WPM: Record<"hinglish" | "english" | "hindi", number> = {
   hinglish: 138, english: 156, hindi: 120,
 };
-const DURATIONS = [15, 30, 45, 60, 90, 120, 180];
+const DURATIONS = [6, 10, 15, 30, 45, 60, 90, 120, 180];
+
+// Ad-specific defaults: moderate roast, medium chaos, low depth (punchy > insightful), high Hinglish
+const DEFAULT_TONE: ToneDialT = { roast_level: 0.65, chaos: 0.55, depth: 0.35, hinglish_ratio: 0.70 };
+
+const INDUSTRIES: { value: Industry; label: string }[] = [
+  { value: "fintech", label: "Fintech" },
+  { value: "d2c", label: "D2C / Consumer" },
+  { value: "saas_b2b", label: "SaaS / B2B" },
+  { value: "fmcg", label: "FMCG" },
+  { value: "beauty", label: "Beauty" },
+  { value: "edtech", label: "Edtech" },
+  { value: "auto", label: "Auto" },
+  { value: "realty", label: "Real Estate" },
+  { value: "ott_media", label: "OTT / Media" },
+  { value: "telecom", label: "Telecom" },
+  { value: "healthcare", label: "Healthcare" },
+  { value: "travel", label: "Travel" },
+  { value: "other", label: "Other" },
+];
+
+const CAMPAIGN_GOALS: { value: CampaignGoal; label: string }[] = [
+  { value: "awareness", label: "Awareness" },
+  { value: "consideration", label: "Consideration" },
+  { value: "conversion", label: "Conversion" },
+  { value: "relaunch", label: "Relaunch" },
+  { value: "feature_drop", label: "Feature drop" },
+];
+
+const PLACEMENTS: { value: AdPlacement; label: string }[] = [
+  { value: "yt_bumper", label: "YouTube bumper (6s)" },
+  { value: "yt_preroll", label: "YouTube pre-roll" },
+  { value: "ig_reel", label: "Instagram Reel" },
+  { value: "ig_story", label: "Instagram Story" },
+  { value: "tv_spot", label: "TV spot" },
+  { value: "ooh", label: "OOH / Billboard" },
+  { value: "audio", label: "Audio-only / Podcast" },
+  { value: "other", label: "Other" },
+];
+
+const PRODUCT_STAGES: { value: ProductStage; label: string }[] = [
+  { value: "launch", label: "Launch" },
+  { value: "relaunch", label: "Relaunch" },
+  { value: "feature", label: "New feature" },
+  { value: "seasonal", label: "Seasonal" },
+  { value: "always_on", label: "Always-on" },
+];
+
+const BRAND_VOICE_TAGS: { value: BrandVoiceTag; label: string }[] = [
+  { value: "premium", label: "Premium" },
+  { value: "playful", label: "Playful" },
+  { value: "cant_do_humor", label: "No humor" },
+  { value: "family_safe_only", label: "Family-safe" },
+  { value: "no_celebrity_impersonation", label: "No celeb impression" },
+  { value: "educational", label: "Educational" },
+  { value: "minimal", label: "Minimal" },
+];
 
 export default function AdsTab() {
   const [productName, setProductName] = useState("");
@@ -20,10 +88,23 @@ export default function AdsTab() {
   const [celebs, setCelebs] = useState<string[]>([]);
   const [celebInput, setCelebInput] = useState("");
   const [notes, setNotes] = useState("");
+  const [tone, setTone] = useState<ToneDialT>(DEFAULT_TONE);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<{ message: string; detail?: unknown } | null>(null);
   const [out, setOut] = useState<{ data: AdGenerateResponse; validation: AdValidation } | null>(null);
   const [exportBusy, setExportBusy] = useState<null | "md" | "fountain">(null);
+
+  // New diversity/quality fields
+  const [industry, setIndustry] = useState<Industry | "">("");
+  const [campaignGoal, setCampaignGoal] = useState<CampaignGoal | "">("");
+  const [placement, setPlacement] = useState<AdPlacement | "">("");
+  const [productStage, setProductStage] = useState<ProductStage | "">("");
+  const [proofPoint, setProofPoint] = useState("");
+  const [positioning, setPositioning] = useState("");
+  const [competitor, setCompetitor] = useState("");
+  const [brandVoiceTags, setBrandVoiceTags] = useState<BrandVoiceTag[]>([]);
+  const [dnsInput, setDnsInput] = useState("");
+  const [doNotSay, setDoNotSay] = useState<string[]>([]);
 
   const req: AdGenerateRequest = useMemo(
     () => ({
@@ -35,9 +116,32 @@ export default function AdsTab() {
       cast: [],
       celebrities: celebs,
       notes: notes || undefined,
+      tone,
+      industry: industry || undefined,
+      campaign_goal: campaignGoal || undefined,
+      placement: placement || undefined,
+      product_stage: productStage || undefined,
+      proof_point: proofPoint || undefined,
+      positioning: positioning || undefined,
+      competitor: competitor || undefined,
+      brand_voice_tags: brandVoiceTags.length ? brandVoiceTags : undefined,
+      do_not_say: doNotSay.length ? doNotSay : undefined,
     }),
-    [productName, productDescription, targetAudience, duration, language, celebs, notes],
+    [
+      productName, productDescription, targetAudience, duration, language, celebs, notes, tone,
+      industry, campaignGoal, placement, productStage, proofPoint, positioning, competitor,
+      brandVoiceTags, doNotSay,
+    ],
   );
+
+  function toggleVoiceTag(tag: BrandVoiceTag) {
+    setBrandVoiceTags((prev) => (prev.includes(tag) ? prev.filter((x) => x !== tag) : [...prev, tag]));
+  }
+  function addDns() {
+    const t = dnsInput.trim();
+    if (t && !doNotSay.includes(t)) setDoNotSay([...doNotSay, t]);
+    setDnsInput("");
+  }
 
   const wpm = WPM[language];
   const wordBand = [Math.round((duration * wpm) / 60 * 0.9), Math.round((duration * wpm) / 60 * 1.1)] as const;
@@ -47,7 +151,16 @@ export default function AdsTab() {
     setErr(null);
     setOut(null);
     try {
-      setOut(await generateAd(req));
+      const result = await generateAd(req);
+      setOut(result);
+      if (result.data.hook) {
+        saveToHistory({
+          tab: "ad",
+          label: productName.length > 60 ? productName.slice(0, 57) + "…" : productName,
+          input: productName,
+          preview: [result.data.hook, ...(result.data.scenes?.[0]?.lines ?? [])].join(" ").slice(0, 200),
+        });
+      }
     } catch (e) {
       const error = e as Error & { detail?: unknown };
       setErr({ message: error.message, detail: error.detail });
@@ -208,9 +321,152 @@ export default function AdsTab() {
             />
           </div>
 
+          {/* ───────── CATEGORY & CAMPAIGN ───────── */}
+          <div className="pt-2 border-t border-border">
+            <div className="caption text-ink-3 mb-3">CATEGORY & CAMPAIGN</div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="field-label">Industry</label>
+                <select
+                  className="select-field"
+                  value={industry}
+                  onChange={(e) => setIndustry(e.target.value as Industry | "")}
+                >
+                  <option value="">Unspecified</option>
+                  {INDUSTRIES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="field-label">Campaign goal</label>
+                <select
+                  className="select-field"
+                  value={campaignGoal}
+                  onChange={(e) => setCampaignGoal(e.target.value as CampaignGoal | "")}
+                >
+                  <option value="">Unspecified</option>
+                  {CAMPAIGN_GOALS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="field-label">Placement</label>
+                <select
+                  className="select-field"
+                  value={placement}
+                  onChange={(e) => setPlacement(e.target.value as AdPlacement | "")}
+                >
+                  <option value="">Unspecified</option>
+                  {PLACEMENTS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="field-label">Product stage</label>
+                <select
+                  className="select-field"
+                  value={productStage}
+                  onChange={(e) => setProductStage(e.target.value as ProductStage | "")}
+                >
+                  <option value="">Unspecified</option>
+                  {PRODUCT_STAGES.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* ───────── STRATEGY ───────── */}
+          <div className="pt-2 border-t border-border">
+            <div className="caption text-ink-3 mb-3">STRATEGY</div>
+            <div>
+              <label className="field-label">Proof point (the one thing this ad must anchor around)</label>
+              <input
+                className="field"
+                value={proofPoint}
+                placeholder="Processes ₹1Cr in 60 seconds · 24-month battery · zero-FX on first ₹10k"
+                maxLength={280}
+                onChange={(e) => setProofPoint(e.target.value)}
+              />
+            </div>
+            <div className="mt-4">
+              <label className="field-label">Positioning / USP</label>
+              <input
+                className="field"
+                value={positioning}
+                placeholder="The only bank account that pays you to use it."
+                maxLength={280}
+                onChange={(e) => setPositioning(e.target.value)}
+              />
+            </div>
+            <div className="mt-4">
+              <label className="field-label">Competitor or displaces (optional)</label>
+              <input
+                className="field"
+                value={competitor}
+                placeholder="UPI apps · the spreadsheet · traditional bank"
+                maxLength={140}
+                onChange={(e) => setCompetitor(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* ───────── BRAND GUARDRAILS ───────── */}
+          <div className="pt-2 border-t border-border">
+            <div className="caption text-ink-3 mb-3">BRAND GUARDRAILS</div>
+            <label className="field-label">Voice tags</label>
+            <div className="flex flex-wrap gap-2">
+              {BRAND_VOICE_TAGS.map((t) => {
+                const active = brandVoiceTags.includes(t.value);
+                return (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => toggleVoiceTag(t.value)}
+                    className={`rounded-pill px-3.5 py-1.5 text-[13px] border transition ${active ? "bg-ink text-surface border-ink" : "bg-surface text-ink-2 border-border hover:text-ink"}`}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-4">
+              <label className="field-label">Do-not-say list (legal / compliance / no-gos)</label>
+              <div className="min-h-[44px] rounded-pill bg-surface border border-border px-3 py-2 flex flex-wrap items-center gap-2">
+                {doNotSay.map((w) => (
+                  <span key={w} className="inline-flex items-center gap-1.5 rounded-pill bg-coral/25 px-3 py-1 text-[13px] text-ink">
+                    {w}
+                    <button
+                      type="button"
+                      onClick={() => setDoNotSay(doNotSay.filter((x) => x !== w))}
+                      className="hover:text-coral-deep"
+                      aria-label={`Remove ${w}`}
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+                <input
+                  className="flex-1 min-w-[120px] bg-transparent outline-none text-[14px] px-2 py-1 placeholder:text-ink-3"
+                  value={dnsInput}
+                  placeholder={doNotSay.length ? "Add another…" : "guaranteed, cure, cheap, [competitor]"}
+                  onChange={(e) => setDnsInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addDns(); }
+                    if (e.key === "Backspace" && !dnsInput && doNotSay.length) {
+                      setDoNotSay(doNotSay.slice(0, -1));
+                    }
+                  }}
+                  onBlur={addDns}
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="rounded-2xl bg-mint/50 border border-mint px-4 py-3 flex items-center gap-2.5 text-[13px] text-ink">
             <CheckCircle2 size={15} className="text-[#1f7a4a] shrink-0" />
             Target word count: {wordBand[0]}-{wordBand[1]} words ({duration}s @ {wpm} WPM)
+          </div>
+
+          <div className="rounded-2xl bg-surface border border-border px-5 py-5">
+            <ToneDial value={tone} onChange={setTone} onReset={() => setTone(DEFAULT_TONE)} />
           </div>
 
           <button
@@ -317,6 +573,54 @@ export default function AdsTab() {
             )}
           </div>
 
+          {/* Quality panel — visible only when we have signals to show */}
+          {out && (out.data.quality || out.data.do_not_say_hits.length || out.data.proof_point_found !== null) && (
+            <div className="card p-6">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="caption text-ink-3 flex items-center gap-2">
+                  <Star size={13} /> QUALITY SIGNALS
+                </div>
+                {out.data.quality && (
+                  <div className="text-[15px] font-semibold text-ink">
+                    {out.data.quality.on_brand + out.data.quality.proof_point_present + out.data.quality.audience_match + out.data.quality.hook_strength + out.data.quality.no_tanmay_leak}<span className="text-ink-3 font-normal"> / 25</span>
+                  </div>
+                )}
+              </div>
+
+              {out.data.quality && (
+                <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-2">
+                  <QualityBar label="On-brand" score={out.data.quality.on_brand} />
+                  <QualityBar label="Proof point" score={out.data.quality.proof_point_present} />
+                  <QualityBar label="Audience" score={out.data.quality.audience_match} />
+                  <QualityBar label="Hook" score={out.data.quality.hook_strength} />
+                  <QualityBar label="No Tanmay leak" score={out.data.quality.no_tanmay_leak} />
+                </div>
+              )}
+
+              {out.data.quality?.notes && (
+                <div className="mt-4 text-[13px] text-ink-2 italic">{out.data.quality.notes}</div>
+              )}
+
+              <div className="mt-4 flex flex-wrap gap-2 text-[12px]">
+                {out.data.proof_point_found === true && (
+                  <span className="inline-flex items-center gap-1 chip bg-mint/70 text-ink">
+                    <CheckCircle2 size={11} /> Proof point anchored
+                  </span>
+                )}
+                {out.data.proof_point_found === false && (
+                  <span className="inline-flex items-center gap-1 chip bg-coral/25 text-coral-deep">
+                    <AlertTriangle size={11} /> Proof point missing from output
+                  </span>
+                )}
+                {out.data.do_not_say_hits.length > 0 && (
+                  <span className="inline-flex items-center gap-1 chip bg-coral/25 text-coral-deep">
+                    <AlertTriangle size={11} /> Banned term(s): {out.data.do_not_say_hits.join(", ")}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Strategic rationale */}
           <div className="rounded-2xl bg-lavender/60 p-8 border border-border">
             <div className="caption text-[#7d6ec6]">STRATEGIC RATIONALE</div>
@@ -389,4 +693,22 @@ function fmt(s: number) {
 }
 function truncate(s: string, n: number) {
   return s.length > n ? s.slice(0, n - 1) + "…" : s;
+}
+
+function QualityBar({ label, score }: { label: string; score: number }) {
+  const pct = Math.max(0, Math.min(5, score)) / 5;
+  const color =
+    score >= 4 ? "bg-mint" : score >= 3 ? "bg-butter" : "bg-coral/50";
+  return (
+    <div className="rounded-xl bg-surface border border-border p-3">
+      <div className="text-[11px] text-ink-3 mb-1.5 truncate">{label}</div>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-[18px] font-bold text-ink leading-none">{score}</span>
+        <span className="text-[11px] text-ink-3">/5</span>
+      </div>
+      <div className="mt-2 h-1.5 rounded-pill bg-border overflow-hidden">
+        <div className={`h-full ${color}`} style={{ width: `${pct * 100}%` }} />
+      </div>
+    </div>
+  );
 }

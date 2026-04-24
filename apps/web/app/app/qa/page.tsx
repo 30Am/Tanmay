@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRight, Copy, ExternalLink, Loader2, Plus, RotateCcw, Share2, ThumbsDown, ThumbsUp } from "lucide-react";
 import { qa } from "@/lib/api";
 import type { Citation, QaResponse } from "@/lib/types";
+import { saveToHistory } from "@/lib/history";
 import ToolTopBar from "@/components/workspace/ToolTopBar";
 
 export default function QaTab() {
@@ -18,7 +19,16 @@ export default function QaTab() {
     setLoading(true); setErr(null); setOut(null);
     setSubmitted(q);
     try {
-      setOut(await qa(q));
+      const result = await qa(q);
+      setOut(result);
+      if (result.status === "answered" && result.answer) {
+        saveToHistory({
+          tab: "qa",
+          label: q.length > 60 ? q.slice(0, 57) + "…" : q,
+          input: q,
+          preview: result.answer.slice(0, 200),
+        });
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     } finally {

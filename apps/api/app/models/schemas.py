@@ -54,9 +54,21 @@ class ToneDial(BaseModel):
 
 class ContentGenerateRequest(BaseModel):
     idea: str = Field(min_length=3, max_length=2000)
-    format: Literal["long_podcast", "reel", "thread", "stage"] = "reel"
+    format: Literal[
+        "reel",
+        "youtube_short",
+        "talking_head",
+        "long_podcast",
+        "thread",
+        "stage",
+        "monologue",
+        "explainer",
+        "interview",
+        "reaction",
+    ] = "reel"
     target_length_seconds: int = Field(default=60, ge=15, le=3600)
     tone: ToneDial = Field(default_factory=ToneDial)
+    language: Literal["hinglish", "english", "hindi"] = "hinglish"
 
 
 class ContentGenerateResponse(BaseModel):
@@ -71,15 +83,40 @@ class AdCast(BaseModel):
     role: str | None = None
 
 
+Industry = Literal[
+    "fintech", "d2c", "saas_b2b", "fmcg", "beauty", "edtech",
+    "auto", "realty", "ott_media", "telecom", "healthcare", "travel", "other",
+]
+CampaignGoal = Literal["awareness", "consideration", "conversion", "relaunch", "feature_drop"]
+Placement = Literal["yt_preroll", "yt_bumper", "ig_reel", "ig_story", "tv_spot", "ooh", "audio", "other"]
+ProductStage = Literal["launch", "relaunch", "feature", "seasonal", "always_on"]
+BrandVoiceTag = Literal[
+    "premium", "playful", "cant_do_humor", "family_safe_only",
+    "no_celebrity_impersonation", "educational", "minimal",
+]
+
+
 class AdGenerateRequest(BaseModel):
     product_name: str
     product_description: str
     target_audience: str | None = None
-    duration_seconds: int = Field(ge=10, le=180)
+    duration_seconds: int = Field(ge=6, le=180)
     language: Literal["hinglish", "english", "hindi"] = "hinglish"
     cast: list[AdCast] = Field(default_factory=list)
     celebrities: list[str] = Field(default_factory=list)
     notes: str | None = None
+    tone: ToneDial = Field(default_factory=ToneDial)
+
+    # New diversity/quality fields — all optional for backward compat.
+    industry: Industry | None = None
+    campaign_goal: CampaignGoal | None = None
+    proof_point: str | None = Field(default=None, max_length=280)
+    positioning: str | None = Field(default=None, max_length=280)
+    competitor: str | None = Field(default=None, max_length=140)
+    brand_voice_tags: list[BrandVoiceTag] = Field(default_factory=list)
+    do_not_say: list[str] = Field(default_factory=list)
+    placement: Placement | None = None
+    product_stage: ProductStage | None = None
 
 
 class AdScene(BaseModel):
@@ -91,6 +128,24 @@ class AdScene(BaseModel):
     duration_seconds: int
 
 
+class AdQualityScores(BaseModel):
+    """Haiku-judged rubric scores, 1-5 on each dimension."""
+
+    on_brand: int = Field(ge=1, le=5)
+    proof_point_present: int = Field(ge=1, le=5)
+    audience_match: int = Field(ge=1, le=5)
+    hook_strength: int = Field(ge=1, le=5)
+    no_tanmay_leak: int = Field(ge=1, le=5)
+    notes: str = ""
+
+    @property
+    def total(self) -> int:
+        return (
+            self.on_brand + self.proof_point_present + self.audience_match
+            + self.hook_strength + self.no_tanmay_leak
+        )
+
+
 class AdGenerateResponse(BaseModel):
     title: str
     hook: str
@@ -99,6 +154,11 @@ class AdGenerateResponse(BaseModel):
     strategy_rationale: str
     brand_safety_flags: list[str] = Field(default_factory=list)
     citations: list[Citation]
+    quality: AdQualityScores | None = None
+    # Words/phrases from do_not_say that leaked into the output. Empty = clean.
+    do_not_say_hits: list[str] = Field(default_factory=list)
+    # True when the stated proof_point (or close paraphrase) was found in output.
+    proof_point_found: bool | None = None
 
 
 class QaRequest(BaseModel):

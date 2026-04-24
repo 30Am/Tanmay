@@ -1,0 +1,75 @@
+{
+  "generated_at": "2026-04-23T21:05:24.564289+00:00",
+  "api_url": "http://localhost:8000",
+  "threshold": 0.38,
+  "tabs_evaluated": [
+    "qa"
+  ],
+  "summary": {
+    "qa": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "pass_rate": 1.0,
+      "avg_style_match": 0.6031,
+      "threshold": 0.38
+    }
+  },
+  "results": [
+    {
+      "tab": "qa",
+      "input": {
+        "question": "what does Tanmay think about consistency in content creation"
+      },
+      "status": "answered",
+      "max_similarity": 0.58952975,
+      "style_match_score": 0.5698,
+      "pass": true,
+      "output_preview": "Okay, so consistency in content creation — this is something I've spoken about a lot, and honestly, it's one of those things where the framework is simple but executing it is where most people fumble."
+    },
+    {
+      "tab": "qa",
+      "input": {
+        "question": "how does Tanmay approach failure and bouncing back"
+      },
+      "status": "answered",
+      "max_similarity": 0.46009466,
+      "style_match_score": 0.5968,
+      "pass": true,
+      "output_preview": "Okay, so failure and bouncing back. Right? Look, I've always been a bit of a cynic and a skeptic — that's just how I'm wired [2]. But I think there's something really important in what Naval said, and"
+    },
+    {
+      "tab": "qa",
+      "input": {
+        "question": "what is Tanmay's take on the Indian comedy scene"
+      },
+      "status": "answered",
+      "max_similarity": 0.6214726,
+      "style_match_score": 0.5922,
+      "pass": true,
+      "output_preview": "Okay, so here's the thing — I haven't really spoken extensively about the *current* Indian comedy scene on the public record in a way that I can confidently pull together for you. Like, I've talked ab"
+    },
+    {
+      "tab": "qa",
+      "input": {
+        "question": "what does Tanmay say about mental health and therapy"
+      },
+      "status": "answered",
+      "max_similarity": 0.5372888,
+      "style_match_score": 0.6183,
+      "pass": true,
+      "output_preview": "Look, I've been pretty open about therapy. I go. I think it's important. Right? Here's the thing — I don't think therapy and friends are an either-or situation. Really great friends *can* be therapeut"
+    },
+    {
+      "tab": "qa",
+      "input": {
+        "question": "how does Tanmay feel about social media and its impact on creators"
+      },
+      "status": "answered",
+      "max_similarity": 0.57030344,
+      "style_match_score": 0.6383,
+      "pass": true,
+      "output_preview": "Look, I have a very love-hate thing with social media, right? Like, on one hand, it's given me everything. Literally everything. My career, my audience, my ability to just put stuff out there without "
+    }
+  ]
+}

@@ -11,6 +11,7 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
 
 from app.core.config import get_settings  # noqa: E402
 from app.core.logging import configure_logging, get_logger
+from app.middleware.ratelimit import RateLimitMiddleware
 from app.routers import ad, content, health, qa
 
 
@@ -34,6 +35,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(RateLimitMiddleware, redis_url=settings.redis_url)
 
 app.include_router(health.router)
 app.include_router(content.router)
